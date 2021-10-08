@@ -10,11 +10,12 @@ def main(options):
         output_tag        = config['output_tag']
         train_vars        = config['train_vars']
 
-        #for var in ['leadJetEta']:
-        for var in train_vars+['{}_mva'.format(options.proc)]:
+        #for var in train_vars+['{}_mva'.format(options.proc)]:
+        #for var in ['dijetAbsDEta', 'dijetDPhi','dijetMinDRJetEle', 'dijetMass', 'dijetDieleAbsDPhiTrunc', 'dijetDieleAbsDEta', 'dijetCentrality','leadJetDieleDPhi', 'subleadJetDieleDPhi', 'leadJetDieleDEta', 'subleadJetDieleDEta','leadElectronPtOvM', 'subleadElectronPtOvM', 'dielectronPt','leadJetEn', 'leadJetPt', 'leadJetEta', 'leadJetPhi','leadJetQGL', 'subleadJetEn', 'subleadJetPt', 'subleadJetEta', 'subleadJetPhi','subleadJetQGL','subsubleadJetEn', 'subsubleadJetPt', 'subsubleadJetEta', 'subsubleadJetPhi', 'subsubleadJetQGL']:
+        for var in ['dijetCentrality']:
              os.system('mkdir -p {}/submissions/{}_DYJobs'.format(os.getcwd(),output_tag))
              sub_file_name = '{}/submissions/{}_DYJobs/sub_DY_{}.sh'.format(os.getcwd(),output_tag,var)
-             sub_command =  'python plotting/DY_validation.py -c configs/dy_valid_config_{}.yaml -M configs/mva_boundaries_config.yaml -s jesTotal -v {}'.format(options.proc.lower(),var)
+             sub_command =  'python plotting/DY_validation.py -c configs/dy_valid_config_{}.yaml -M configs/mva_boundaries_config.yaml -s jesTotal -v {} -r'.format(options.proc.lower(),var)
              #sub_command =  'python plotting/DY_validation.py -c configs/dy_valid_config_{}.yaml -M configs/mva_boundaries_config.yaml -s jesTotal jer ElPtScale -v {} -r'.format(options.proc.lower(),var)
 
              with open('./submissions/sub_DY_single_vars.sh') as f_template:

@@ -16,9 +16,9 @@ data_file_dir:
 mc_file_names:
     sig:
         VBF:
-            '2018': 'VBF_UL2017.root'
+            '2018': 'VBF_UL2018.root'
         ggH:
-            '2018': 'ggH_UL2017.root'
+            '2018': 'ggH_UL2018.root'
             
     bkg:
         DYMC:

@@ -16,9 +16,9 @@ data_file_dir:
 mc_file_names:
     sig:
         VBF:
-            '2016': 'VBF_UL2017.root'
+            '2016': 'VBF_UL2016.root'
         ggH:
-            '2016': 'ggH_UL2017.root'
+            '2016': 'ggH_UL2016.root'
             
             
     bkg:

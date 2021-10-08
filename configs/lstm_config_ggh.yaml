@@ -13,9 +13,9 @@ data_file_dir:
 mc_file_names:
     sig:
         ggH:
-            '2016': 'ggH_UL2017.root' #re-use 2017 in 2016 for noe
+            '2016': 'ggH_UL2016.root' #re-use 2017 in 2016 for noe
             '2017': 'ggH_UL2017.root'
-            '2018': 'ggH_UL2017.root' #re-use 2017 in 2018 for noe
+            '2018': 'ggH_UL2018.root' #re-use 2017 in 2018 for noe
     bkg:
         DYMC:
             '2016': 'DY_UL2016.root'

@@ -123,26 +123,30 @@ class DYPlotter(object):
                 f32_syst_vars += [var_name+'_'+syst_name+ext for var_name in f32_precision_vars] 
                 i8_syst_vars  += [var_name+'_'+syst_name+ext for var_name in i8_precision_vars] 
 
-        #remove unused variables
-        used_variables = self.root_obj.train_vars+self.cut_map.keys()+['weight']+['proc']
-        for col in self.root_obj.data_df.columns: #looping through data columns wont so we dont delete systs
-            if col not in used_variables: 
-                del self.root_obj.mc_df_bkg[col]
-                del self.root_obj.data_df[col]
-
         #change certain dtypes in remaining variables
         for v in f32_precision_vars+f32_syst_vars:
             if v in self.root_obj.mc_df_bkg.columns:
-                self.root_obj.mc_df_bkg[v] = self.root_obj.mc_df_bkg[v].astype('float32')
+                self.root_obj.mc_df_bkg[v] = self.root_obj.mc_df_bkg[v].astype('float16')
             if v in self.root_obj.data_df.columns:
-                self.root_obj.data_df[v]   = self.root_obj.data_df[v].astype('float32')
+                self.root_obj.data_df[v]   = self.root_obj.data_df[v].astype('float16')
 
         for v in i8_precision_vars+i8_syst_vars:
             if v in self.root_obj.mc_df_bkg.columns:
                 self.root_obj.mc_df_bkg[v] = self.root_obj.mc_df_bkg[v].astype('int8')
             if v in self.root_obj.data_df.columns:
                 self.root_obj.data_df[v]   = self.root_obj.data_df[v].astype('int8')
+
+        #save df's with new data types
+        for year in self.root_obj.years:
+            root_obj.save_modified_dfs(year, ignore_sig=True)
           
+        #remove unused variables - need to do this after saving since will be differ deoending on variable being plot
+        used_variables = self.root_obj.train_vars+self.cut_map.keys()+['weight']+['proc']
+        for col in self.root_obj.data_df.columns: #looping through data columns wont so we dont delete systs
+            if col not in used_variables: 
+                del self.root_obj.mc_df_bkg[col]
+                del self.root_obj.data_df[col]
+
         mc_df_mem = self.root_obj.mc_df_bkg.memory_usage(deep=True).sum() / 1000                                            
         data_df_mem = self.root_obj.data_df.memory_usage(deep=True).sum() / 1000                                            
         print('Final memory usage is {} GB'.format(mc_df_mem+data_df_mem))

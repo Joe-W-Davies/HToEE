@@ -15,13 +15,13 @@ data_file_dir:
 mc_file_names:
     sig:
         ggH:
-            '2016': 'ggH_UL2017.root' #re-use 2017 in 2016 for now
+            '2016': 'ggH_UL2016.root'
             '2017': 'ggH_UL2017.root'
-            '2018': 'ggH_UL2017.root' #re-use 2017 in 2018 for now
+            '2018': 'ggH_UL2018.root'
     bkg:
         DYMC:
             '2016': 'DY_UL2016.root'
-            '2017': 'DY_UL2017.root' #re-use 2016 for now
+            '2017': 'DY_UL2017.root'
             '2018': 'DY_UL2018.root'
 
         TT2L2Nu:
@@ -31,7 +31,7 @@ mc_file_names:
         TTSemiL:
             '2016': 'TTSemi_UL2016.root'
             '2017': 'TTSemi_UL2017.root'
-            '2018': 'TTSemi_UL2017.root'
+            '2018': 'TTSemi_UL2018.root'
 
 data_file_names:
     Data:
@@ -66,7 +66,6 @@ vars_to_add:
 
 #preselection that will be applied to all samples
 preselection:
-    #'dielectronMass > 110 and dielectronMass < 150 and leadElectronPtOvM > 0.333 and subleadElectronPtOvM > 0.25 and (leadElectronCharge == -subleadElectronCharge)'
     'dielectronMass > 110 and dielectronMass < 150 and leadElectronPtOvM > 0.333 and subleadElectronPtOvM > 0.25 and (leadElectronCharge == -subleadElectronCharge)' 
 
 #need looser cut for re-weighting around Z mass. Actual CR selection is defined is DataHandling.py
