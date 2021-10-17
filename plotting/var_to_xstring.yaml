@@ -1,0 +1,53 @@
+var_to_xstring: 
+    'leadJetEn':               '$E_{j_1}$'
+    'leadJetPt':               '$p_{T,j_1}$'
+    'leadJetEta':              '$\eta_{j_1}$'
+    'leadJetPhi':              '$\phi_{j_1}$'
+    'leadJetQGL':              'Lead jet QGL'
+    'subleadJetEn':            '$E_{j_2}$'
+    'subleadJetPt':            '$p_{T,j_2}$'
+    'subleadJetEta':           '$\eta_{j_2}$'
+    'subleadJetPhi':           '$\phi_{j_2}$'
+    'subleadJetQGL':           'Sublead jet QGL'
+    'subsubleadJetEn':         '$E_{j_3}$'
+    'subsubleadJetPt':         '$p_{T,j_3}$'
+    'subsubleadJetEta':        '$\eta_{j_3}$'
+    'subsubleadJetPhi':        '$\phi_{j_3}$'
+    'subsubleadJetQGL':        'Subsublead jet QGL'
+    'leadElectronPtOvM':       '$p_{T,e_1}/m_{ee}$'
+    'subleadElectronPtOvM':    '$p_{T,e_1}/m_{ee}$'
+    'dijetAbsDEta':            '$|\Delta\eta(jj)|$'
+    'dijetDPhi':               '$\Delta\phi(jj)$'
+    'dijetMass':               '$m_{jj}$'
+    'dijetDieleAbsDPhiTrunc':  '$|\Delta\phi(jj,ee)|$'
+    'dijetDieleAbsDEta':       '$|\Delta\eta(jj,ee)|$'
+    'dijetCentrality':         'Dijet centrality'
+    'dijetMinDRJetEle':        'min($\Delta R(e,jj)$)'
+    'leadElectronEta':         '$\eta_{e_1}$'
+    'subleadElectronEta':      '$\eta_{e_2}$'
+    'dielectronCosPhi':        '$\cos\phi_{ee}$'
+    'dielectronPt':            '$p_{T,ee}$'
+    'leadJetDieleDPhi':        '$\Delta\phi(j_1,ee)$'
+    'leadJetDieleDEta':        '$\Delta\eta(j_1,ee)$'
+    'subleadJetDieleDPhi':     '$\Delta\phi(j_2,ee)$'
+    'subleadJetDieleDEta':     '$\Delta\eta(j_2,ee)$'
+    #'subsubleadJetCentrality': [0.,1,false]
+    #'nSoftJets':               [0.,6,false]
+    #'metSumET':                [0,4000]
+    #'metPt':                   [0,400]
+    #'metPhi':                  [-3.,3]
+    #'leadJetBTagScore':        [0,1]
+    #'subleadJetBTagScore':     [0,1]
+    #'subsubleadJetBTagScore':  [0,1]
+
+    'dielectronMass':          '$m_{ee}$'
+    #'dielectronMass':          [80,100,false]
+    #'leadJetPUJID':            [0,7,false]
+    #'subleadJetPUJID':         [0,7,false]
+    #'subsubleadJetPUJID':      [0,7,false]
+    #'leadJetID':               [0,7,false]
+    #'subleadJetID':            [0,7,false]
+    #'subsubleadJetID':         [0,7,false]
+    
+    'VBF_mva':                  'VBF BDT'
+    'ggH_mva':                  'ggH BDT'

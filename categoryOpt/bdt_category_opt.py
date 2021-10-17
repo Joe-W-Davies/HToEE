@@ -65,7 +65,7 @@ def main(options):
         ranges    = [ [0.15,1.] ]
         names     = ['{} score'.format(output_tag)] #arbitrary
         print_str = ''
-        cats = [1,2,3,4]
+        cats = [1,2,3,4,5]
         AMS  = []
 
         #just to use class methods here

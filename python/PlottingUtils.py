@@ -40,6 +40,11 @@ class Plotter(object):
         with open('plotting/var_to_xrange.yaml', 'r') as plot_config_file:
             plot_config        = yaml.load(plot_config_file)
             self.var_to_xrange = plot_config['var_to_xrange']
+
+        #get x string replacements from yaml config
+        with open('plotting/var_to_xstring.yaml', 'r') as plot_config_file:
+            plot_string_cfg    = yaml.load(plot_config_file)
+            self.var_to_xstring = plot_string_cfg['var_to_xstring']
             
         missing_vars = [x for x in input_vars if x not in self.var_to_xrange.keys()]
         if len(missing_vars)!=0: raise IOError('Missing variables in var_to_xrange.py: {}'.format(missing_vars))
@@ -109,8 +114,8 @@ class Plotter(object):
         bins = np.linspace(self.var_to_xrange[var][0], self.var_to_xrange[var][1], n_bins)
 
         #add sig mc
-        #FIXME add this back in!
-        #axes.hist(var_sig, bins=bins, label=self.sig_labels[0]+r' ($\mathrm{H}\rightarrow\mathrm{ee}$) '+self.num_to_str(self.sig_scaler), weights=sig_weights*(self.sig_scaler), histtype='step', color=self.sig_colour, zorder=10)
+        #NOTE add this back in if not doing blinded mee plots
+        axes.hist(var_sig, bins=bins, label=self.sig_labels[0]+r' ($\mathrm{H}\rightarrow\mathrm{ee}$) '+self.num_to_str(self.sig_scaler), weights=sig_weights*(self.sig_scaler), histtype='step', color=self.sig_colour, zorder=10)
 
         #data
         if extra_cuts is not None:  data_binned, bin_edges = np.histogram(self.data_df.query(extra_cuts)[var].values, bins=bins)
@@ -165,7 +170,6 @@ class Plotter(object):
         axes.legend(bbox_to_anchor=(0.9,0.97), ncol=2, prop={'size':10})
         self.plot_cms_labels(axes)
            
-        var_name_safe = var.replace('_',' ')
         if ratio_plot:
             if blind: 
                 ratio.errorbar(bin_centres, (blinded_data_binned/bkg_stack_summed), yerr=[ (blinded_data_binned-blinded_data_down)/bkg_stack_summed, (blinded_data_up-blinded_data_binned)/bkg_stack_summed], fmt='o', ms=3, color='black', capsize=0)
@@ -177,12 +181,12 @@ class Plotter(object):
                 bkg_std_up_ratio   = np.ones_like(bkg_std_up)   + ((bkg_std_up - bkg_stack_summed)/bkg_stack_summed)
             ratio.fill_between(bins, list(bkg_std_down_ratio)+[bkg_std_down_ratio[-1]], list(bkg_std_up_ratio)+[bkg_std_up_ratio[-1]], alpha=0.3, step="post", color="grey", lw=1, zorder=4)
 
-            ratio.set_xlabel('{}'.format(var_name_safe), ha='right', x=1, size=13)
+            ratio.set_xlabel('{}'.format(self.var_to_xstring[var]), ha='right', x=1, size=13)
             ratio.set_ylabel('Data/MC', size=13)
             #ratio.set_ylim(0, 2)
             ratio.set_ylim(0.8, 1.2)
             ratio.grid(True, linestyle='dotted')
-        else: axes.set_xlabel('{}'.format(var_name_safe), ha='right', x=1, size=13)
+        else: axes.set_xlabel('{}'.format(self.var_to_xstring[var]), ha='right', x=1, size=13)
        
         Utils.check_dir('{}/plotting/plots/{}'.format(os.getcwd(), out_label))
         if extra_tag is not None: 
@@ -192,9 +196,10 @@ class Plotter(object):
         plt.close()
 
     @classmethod 
-    def plot_cms_labels(self, axes, label='Work in progress', lumi='41.5',energy='(13 TeV)'):
+    def plot_cms_labels(self, axes, label='Work in progress', lumi='137',energy='(13 TeV)'):
         axes.text(0, 1.01, r'\textbf{CMS} %s'%label, ha='left', va='bottom', transform=axes.transAxes, size=14)
-        axes.text(1, 1.01, r'%s fb\textsuperscript{-1} %s'%(lumi,energy), ha='right', va='bottom', transform=axes.transAxes, size=14)
+        if len(lumi)==0: axes.text(1, 1.01, r'%s'%(energy), ha='right', va='bottom', transform=axes.transAxes, size=14)
+        else: axes.text(1, 1.01, r'%s fb\textsuperscript{-1} %s'%(lumi,energy), ha='right', va='bottom', transform=axes.transAxes, size=14)
 
     def plot_roc(self, y_train, y_pred_train, train_weights, y_test, y_pred_test, test_weights, out_tag='MVA'):
         bkg_eff_train, sig_eff_train, _ = roc_curve(y_train, y_pred_train, sample_weight=train_weights)
@@ -309,9 +314,9 @@ class Plotter(object):
         #axes.axvspan(0, 0.213, ymax=0.7, color='grey', alpha=0.35)
 
         #VBF BDT
-        axes.axvline(0.890, ymax=0.7, color='black', linestyle='--')
-        axes.axvline(0.741, ymax=0.7, color='black', linestyle='--')
-	axes.axvspan(0, 0.741, ymax=0.7, color='grey', alpha=0.35)
+        #axes.axvline(0.890, ymax=0.7, color='black', linestyle='--')
+        #axes.axvline(0.741, ymax=0.7, color='black', linestyle='--')
+	#axes.axvspan(0, 0.741, ymax=0.7, color='grey', alpha=0.35)
 
 	#VBF DNN
 	#axes.axvline(0.907, ymax=0.71, color='black', linestyle='--')
@@ -426,6 +431,7 @@ class Plotter(object):
         axes.text(-0.15, 1.01, '{}'.format(exponent_label), ha='left', va='bottom', transform=axes.transAxes, size=11)
         Plotter.plot_cms_labels(axes)
         fig.savefig('{}/categoryOpt/nCats_vs_AMS_{}.pdf'.format(os.getcwd(), out_tag))
+        print('saved fig as: {}/categoryOpt/nCats_vs_AMS_{}.pdf'.format(os.getcwd(), out_tag))
 
     def poisson_interval(self, x, variance, level=0.68): 
         neff = x**2/variance

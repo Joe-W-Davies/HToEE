@@ -79,8 +79,8 @@ def main(options):
                                        #Tag sequence stuff#
     #specify sequence of tags and preselection targetting each
 
-    tag_sequence      = ['VBF','ggH']
-    true_procs        = ['VBF','ggH']
+    tag_sequence      = ['VBF','ggH'] #categories targetted
+    true_procs        = ['VBF','ggH', 'ttH'] #procs to run through cats
     if (not read_syst) and (not options.dump_weight_systs) : true_procs.append('Data') #is this line needed? guess so since could run mc and data together in a stat-only config
     if options.data_only: true_procs = ['Data'] #do data on its own (for memory really)
 

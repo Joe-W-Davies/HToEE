@@ -23,9 +23,9 @@ mc_file_names:
             '2018': 'DY_UL2018.root'
 
         EWKZlowmass:
-            '2016': 'EWKZlowmass_2016.root'
-            '2017': 'EWKZlowmass_2017.root'
-            '2018': 'EWKZlowmass_2018.root'
+            '2016': 'EWKlowmass_2017.root' #dont have UL right now
+            '2017': 'EWKlowmass_2017.root'
+            '2018': 'EWKlowmass_2018.root'
 
 data_file_names:
     Data:
@@ -56,13 +56,14 @@ vars_to_add:
 
 # "baseline" selection that will be applied to all samples. None of these variables should be inputs!
 preselection:
-    'dielectronMass > 80 and dielectronMass < 100' #NOTE mass range did need to be looser since a syst with mass variations can push outisde of the nominal range BUT not handled upstream so can tighten again
+    'dielectronMass > 83 and dielectronMass < 97 and leadElectronPtOvM>0.3 and subleadElectronPtOvM>0.2 and leadElectronPt>30 and subleadElectronPt>20 and dijetMass>225 and leadJetPt>30'
 
 cut_map:
-    dielectronMass: ['>80','<100']
-    #dielectronMass: ['>85','<95']
+    dielectronMass: ['>85','<95']
     leadElectronPtOvM: ['>0.333']
     subleadElectronPtOvM: ['>0.25']
+    leadElectronPt: ['>35']
+    subleadElectronPt: ['>25']
     dijetMass: ['>250']
     leadJetPt: ['>40']
     subleadJetPt: ['>25']

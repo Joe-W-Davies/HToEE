@@ -35,8 +35,8 @@ def main(options):
 
         proc_to_tree_name = config['proc_to_tree_name']
 
-        #sig_colour        = 'forestgreen'
-        sig_colour        = 'red'
+        sig_colour        = 'forestgreen'
+        #sig_colour        = 'red'
         bkg_colour        = 'violet'
  
                                            #Data handling stuff#
@@ -62,10 +62,16 @@ def main(options):
         with open('plotting/var_to_xrange.yaml', 'r') as plot_config_file:
             plot_config        = yaml.load(plot_config_file)
             var_to_xrange      = plot_config['var_to_xrange']
+
+        #get x string replacements from yaml config
+        with open('plotting/var_to_xstring.yaml', 'r') as plot_config_file:
+            plot_string_cfg    = yaml.load(plot_config_file)
+            var_to_xstring     = plot_string_cfg['var_to_xstring']
  
         #set up X, w and y, train-test 
         plotter = Plotter(root_obj, train_vars, sig_col=sig_colour, norm_to_data=True)
         for var in train_vars:
+        #for var in ['dielectronCosPhi']:
 
             fig  = plt.figure(1)
             axes = fig.gca()
@@ -82,13 +88,13 @@ def main(options):
             axes.hist(var_bkg, bins=bins, label='Simulated background', weights=bkg_weights, histtype='stepfilled', color='blue', zorder=0, alpha=0.4, normed=True)
 
             axes.set_ylabel('Arbitrary Units', ha='right', y=1, size=13)
-            axes.set_ylim(bottom=0)
+            current_bottom, current_top = axes.get_ylim()
+            axes.set_ylim(bottom=0, top=1.2*current_top)
             axes.set_xlim(left=var_to_xrange[var][0], right=var_to_xrange[var][1])
             axes.legend(bbox_to_anchor=(0.97,0.97), ncol=1)
-            plotter.plot_cms_labels(axes)
+            plotter.plot_cms_labels(axes, lumi='')
                
-            var_name_safe = var.replace('_',' ')
-            axes.set_xlabel('{}'.format(var_name_safe), ha='right', x=1, size=13)
+            axes.set_xlabel('{}'.format(var_to_xstring[var]), ha='right', x=1, size=13)
 
             Utils.check_dir('{}/plotting/plots/{}/normed/'.format(os.getcwd(), output_tag))
             fig.savefig('{0}/plotting/plots/{1}/normed/{1}_{2}_normalised.pdf'.format(os.getcwd(), output_tag, var))

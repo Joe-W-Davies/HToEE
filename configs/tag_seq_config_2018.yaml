@@ -19,6 +19,8 @@ mc_file_names:
             '2018': 'VBF_UL2018.root'
         ggH:
             '2018': 'ggH_UL2018.root'
+        ttH:
+            '2018': 'ttH_UL2018.root'
             
     bkg:
         DYMC:
@@ -32,6 +34,7 @@ data_file_names:
 proc_to_tree_name:
     VBF:  'Events'
     ggH:  'Events'
+    ttH:  'Events'
     DYMC: 'Events'
     Data: 'Events'
 

@@ -1,7 +1,7 @@
 #electron vars
 nominal_vars = ['weight', 'centralObjectWeight', 'leadElectronPtOvM', 'subleadElectronPtOvM', #'leadElectronIDMVA', 'subleadElectronIDMVA',
-                'leadElectronEta', #'leadElectronEn', 'leadElectronPt', 'leadElectronPhi', 'leadElectronMass',
-                'subleadElectronEta',#'subleadElectronPt', 'subleadElectronEn',  'subleadElectronPhi', 'subleadElectronMass',
+                'leadElectronEta', 'leadElectronPt', #'leadElectronEn', 'leadElectronPt', 'leadElectronPhi', 'leadElectronMass',
+                'subleadElectronEta', 'subleadElectronPt', #'subleadElectronPt', 'subleadElectronEn',  'subleadElectronPhi', 'subleadElectronMass',
                 #'subsubleadElectronEta',#'subsubleadElectronPt', 'subsubleadElectronEn', 'subsubleadElectronPhi', 'subsubleadElectronMass',
                 'dielectronCosPhi','dielectronPt', 'dielectronMass', 'leadJetPt','subleadJetPt',#'leadJetMass', 'subleadJetMass', 
                 'leadJetEn', 'leadJetPt','leadJetEta', 'leadJetPhi','leadJetQGL', #add jet en
@@ -12,7 +12,7 @@ nominal_vars = ['weight', 'centralObjectWeight', 'leadElectronPtOvM', 'subleadEl
                 'leadJetDieleDPhi', 'leadJetDieleDEta', 'subleadJetDieleDPhi', 'subleadJetDieleDEta',
                 'leadElectronCharge', 'subleadElectronCharge',
                 #'nSoftJets','metSumET','metPhi','metPt' , 'leadJetBTagScore', 'subleadJetBTagScore', 'subsubleadJetBTagScore',
-                'leadJetPUJID','subleadJetPUJID', 'subsubleadJetPUJID'#,'leadJetID','subleadJetID','subsubleadJetID'
+                #'leadJetPUJID','subleadJetPUJID', 'subsubleadJetPUJID'#,'leadJetID','subleadJetID','subsubleadJetID'
                ]
 
 #for MVA training, hence not including masses

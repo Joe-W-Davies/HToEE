@@ -64,10 +64,18 @@ def main(options):
 
 
         dy_plotter = DYPlotter(root_obj,cut_map)
-        if options.reload_samples: #FIXME: reading in for the first time  wont re-weight sample!
+        if options.reload_samples: #FIXME: reading in for the first time  wont re-weight sample! (OR BEING READ IN THE FOR THE FIRST TIME) (or get the reload samples flag out of the DataHandler object since trigger if no sample exist
             dy_plotter.pt_reweight()
+        #FIXME still need this else dont remove variables again!
+        dy_plotter.manage_memory(options.systematics, save=options.reload_samples)
 
-        dy_plotter.manage_memory(options.systematics)
+        #DEBUG
+        print 'Background columns'
+        print root_obj.mc_df_bkg.columns[:]
+     
+        print 'Background columns'
+        print root_obj.data_df.columns[:]
+
         if (options.var_name is None) or ('mva' in options.var_name.lower()): dy_plotter.eval_mva(options.mva_config, output_tag) #little bit hard coded - be careful if 'mva' not in MVA ouput name. Below line is safer but longer.
         #dy_plotter.eval_mva(options.mva_config, output_tag)
         #--------------------------------------------------------------------------------------------------
@@ -75,6 +83,10 @@ def main(options):
         with open('plotting/var_to_xrange.yaml', 'r') as plot_config_file:
             plot_config        = yaml.load(plot_config_file)
             var_to_xrange      = plot_config['var_to_xrange'] 
+
+        with open('plotting/var_to_xstring.yaml', 'r') as plot_config_file:
+            plot_string_cfg    = yaml.load(plot_config_file)
+            var_to_xstring = plot_string_cfg['var_to_xstring']
 
         if options.var_name is not None: vars_to_plot = [options.var_name]
         else: var_to_plot = all_train_vars+[dy_plotter.proc+'_mva']
@@ -94,10 +106,11 @@ def main(options):
             dy_plotter.plot_bkgs(cut_str, axes, var, var_bins, data_binned, bin_centres, data_stat_down_up)
 
             #syst stuff
-            dy_plotter.plot_systematics(cut_str, axes, var, var_bins, options.systematics, do_mva=(options.var_name is None))
+            dy_plotter.plot_systematics(cut_str, axes, var, var_bins, options.systematics, do_mva=('mva' in options.var_name)) #FIXME: make this more general
 
             axes = dy_plotter.set_canv_style(axes, var, var_bins)
             axes[0].legend(bbox_to_anchor=(0.97,0.97), ncol=1)
+            axes[1].set_xlabel(var_to_xstring[var], size=14, ha='right', x=1)
             Utils.check_dir('{}/plotting/plots/{}'.format(os.getcwd(), output_tag))
             #fig.savefig('{0}/plotting/plots/{1}/{1}_{2}.pdf'.format(os.getcwd(), output_tag, var)) 
             fig.savefig('/vols/cms/jwd18/Hee/MLCategorisation/CMSSW_10_2_0/src/HToEE/plotting/plots/{0}/{0}_{1}.pdf'.format(output_tag, var))  #temp hardcode
@@ -114,6 +127,7 @@ if __name__ == "__main__":
     opt_args = parser.add_argument_group('Optional Arguements')
     opt_args.add_argument('-r','--reload_samples', help='re-load the .root files and convert into pandas DataFrames', action='store_true', default=False)
     opt_args.add_argument('-n','--n_bins', help='number of bins for plotting each variables', action='store', default=41, type=int)
+    #opt_args.add_argument('-n','--n_bins', help='number of bins for plotting each variables', action='store', default=101, type=int)
     opt_args.add_argument('-v','--var_name', help='Name of single variable if wanting to plot just one', action='store', default=None, type=str)
     options=parser.parse_args()
     main(options)

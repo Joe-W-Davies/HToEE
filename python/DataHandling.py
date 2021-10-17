@@ -78,10 +78,10 @@ class ROOTHelpers(object):
         self.years              = set()
         self.lumi_map           = {'2016':35.9, '2017':41.5, '2018':59.7}
         self.lumi_scale         = True
-        self.XS_map             = {'ggH':48.58*5E-9, 'VBF':3.782*5E-9, 'ggH_Hgg':48.58*0.002, 'VBF_Hgg':3.782*0.002, 'DYMC': 6225.4, 'TT2L2Nu':86.61, 'TTSemiL':358.57, 'EWKZ':0.077, 'EWKZlowmass':1.014} #all in pb. also have BR for signals
-        self.eff_acc            = {'2016':{'ggH':0.3827673, 'VBF':0.4024842, 'ggH_Hgg':-999, 'VBF_Hgg':-999, 'DYMC':0.0644015, 'TT2L2Nu':0.0184377, 'TTSemiL':0.0000877, 'EWKZ':0.1682972, 'EWKZlowmass':0.1023668}, #Pass17
-                                   '2017':{'ggH':0.4084144, 'VBF':0.4198171, 'ggH_Hgg':-999, 'VBF_Hgg':-999, 'DYMC':0.0682661, 'TT2L2Nu':0.0192838, 'TTSemiL':0.0001087, 'EWKZ':0.1682972, 'EWKZlowmass':0.1023668},
-                                   '2018':{'ggH':0.4120200, 'VBF':0.4225721, 'ggH_Hgg':-999, 'VBF_Hgg':-999, 'DYMC':0.0688228, 'TT2L2Nu':0.0194739, 'TTSemiL':0.0001059, 'EWKZ':0.1622357, 'EWKZlowmass':0.0991182}
+        self.XS_map             = {'ggH':48.58*5E-9, 'VBF':3.782*5E-9, 'ttH':0.5071*5E-9, 'ggH_Hgg':48.58*0.002, 'VBF_Hgg':3.782*0.002, 'DYMC': 6225.4, 'TT2L2Nu':86.61, 'TTSemiL':358.57, 'EWKZ':0.077, 'EWKZlowmass':1.014} #all in pb. also have BR for signals
+        self.eff_acc            = {'2016':{'ggH':0.3929525, 'VBF':0.4024842, 'ttH':0.3834742, 'ggH_Hgg':-999, 'VBF_Hgg':-999, 'DYMC':0.0644015, 'TT2L2Nu':0.0184377, 'TTSemiL':0.0000877, 'EWKZ':0.1682972, 'EWKZlowmass':0.1023668}, #Pass17
+                                   '2017':{'ggH':0.4084144, 'VBF':0.4198171, 'ttH':0.4044383, 'ggH_Hgg':-999, 'VBF_Hgg':-999, 'DYMC':0.0682661, 'TT2L2Nu':0.0192838, 'TTSemiL':0.0001087, 'EWKZ':0.1682972, 'EWKZlowmass':0.1023668},
+                                   '2018':{'ggH':0.4120200, 'VBF':0.4225721, 'ttH':0.4067446, 'ggH_Hgg':-999, 'VBF_Hgg':-999, 'DYMC':0.0688228, 'TT2L2Nu':0.0194739, 'TTSemiL':0.0001059, 'EWKZ':0.1622357, 'EWKZlowmass':0.0991182}
                                   }     
 
         self.out_tag            = out_tag
