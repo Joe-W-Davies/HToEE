@@ -277,7 +277,7 @@ class taggerBase(object):
 
         if print_yields: 
             print_str = '*** Yields ***'
-            lumi_map  = {'2016':35.9, '2017':41.5, '2018':59.7}
+            lumi_map  = {'2016A':35.9, '2016B':35.9, '2017':41.5, '2018':59.7}
 
         for proc in self.true_procs:
             selected_df = self.combined_df[self.combined_df.proc==proc]

@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 try:
      plt.style.use("cms10_6_HP")
 except IOError:
+     import warnings
      warnings.warn('Could not import user defined matplot style file. Using default style settings...')
 import scipy.stats
 

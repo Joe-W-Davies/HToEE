@@ -127,7 +127,6 @@ if __name__ == "__main__":
     opt_args = parser.add_argument_group('Optional Arguements')
     opt_args.add_argument('-r','--reload_samples', help='re-load the .root files and convert into pandas DataFrames', action='store_true', default=False)
     opt_args.add_argument('-n','--n_bins', help='number of bins for plotting each variables', action='store', default=41, type=int)
-    #opt_args.add_argument('-n','--n_bins', help='number of bins for plotting each variables', action='store', default=101, type=int)
     opt_args.add_argument('-v','--var_name', help='Name of single variable if wanting to plot just one', action='store', default=None, type=str)
     options=parser.parse_args()
     main(options)

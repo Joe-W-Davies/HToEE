@@ -15,29 +15,34 @@ data_file_dir:
 mc_file_names:
     sig:
         ggH:
-            '2016': 'ggH_UL2016.root'
-            '2017': 'ggH_UL2017.root'
-            '2018': 'ggH_UL2018.root'
+            '2016A': 'ggHA_UL2016.root'
+            '2016B': 'ggHB_UL2016.root'
+            #'2017': 'ggH_UL2017.root'
+            #'2018': 'ggH_UL2018.root'
     bkg:
         DYMC:
-            '2016': 'DY_UL2016.root'
-            '2017': 'DY_UL2017.root'
-            '2018': 'DY_UL2018.root'
+            '2016A': 'DYA_UL2016.root'
+            '2016B': 'DYB_UL2016.root'
+            #'2017': 'DY_UL2017.root'
+            #'2018': 'DY_UL2018.root'
 
         TT2L2Nu:
-            '2016': 'TTLNu_UL2016.root'
-            '2017': 'TTLNu_UL2017.root'
-            '2018': 'TTLNu_UL2018.root'
+            '2016A': 'TTLNuA_UL2016.root'
+            '2016B': 'TTLNuB_UL2016.root'
+            #'2017': 'TTLNu_UL2017.root'
+            #'2018': 'TTLNu_UL2018.root'
         TTSemiL:
-            '2016': 'TTSemi_UL2016.root'
-            '2017': 'TTSemi_UL2017.root'
-            '2018': 'TTSemi_UL2018.root'
+            '2016A': 'TTSemiA_UL2016.root'
+            '2016B': 'TTSemiB_UL2016.root'
+            #'2017': 'TTSemi_UL2017.root'
+            #'2018': 'TTSemi_UL2018.root'
 
 data_file_names:
     Data:
-        '2016': 'Data_UL2016.root'
-        '2017': 'Data_UL2017.root'
-        '2018': 'Data_UL2018.root'
+        '2016A': 'DataA_UL2016.root'
+        '2016B': 'DataB_UL2016.root'
+        #'2017': 'Data_UL2017.root'
+        #'2018': 'Data_UL2018.root'
 
 #.root MC files for all years (bkg) should have these tree path:
 proc_to_tree_name:

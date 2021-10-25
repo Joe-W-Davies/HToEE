@@ -159,15 +159,15 @@ class DYPlotter(object):
                 self.root_obj.save_modified_dfs(year, ignore_sig=True)
           
         #remove unused variables - need to do this after saving since will be differ deoending on variable being plot
-        used_variables = self.root_obj.train_vars+self.cut_map.keys()+['weight']+['proc']
+        used_variables = self.root_obj.train_vars+self.cut_map.keys()+['weight']+['proc']+['centralObjectWeight']
         for col in self.root_obj.data_df.columns: #looping through data columns wont so we dont delete systs
             if col not in used_variables: 
                 del self.root_obj.mc_df_bkg[col]
                 del self.root_obj.data_df[col]
 
-        #dont need central obj weight for these plots either
-        if 'centralObjectWeight' in self.root_obj.mc_df_bkg.columns: del self.root_obj.mc_df_bkg['centralObjectWeight']
-        if 'centralObjectWeight' in self.root_obj.data_df.columns: del self.root_obj.data_df['centralObjectWeight']
+        #dont need sigma_m/m for these plots either
+        #if 'centralObjectWeight' in self.root_obj.mc_df_bkg.columns: del self.root_obj.mc_df_bkg['centralObjectWeight']
+        #if 'centralObjectWeight' in self.root_obj.data_df.columns: del self.root_obj.data_df['centralObjectWeight']
         if 'sigmaMoM' in self.root_obj.mc_df_bkg.columns: del self.root_obj.mc_df_bkg['sigmaMoM']
         if 'sigmaMoM' in self.root_obj.data_df.columns: del self.root_obj.data_df['sigmaMoM']
 
@@ -248,19 +248,22 @@ class DYPlotter(object):
         axes[1].errorbar( bin_centres, data_bkg_ratio, yerr=[(data_binned-data_stat_down_up[0])/sumw_all_bkgs,(data_stat_down_up[1] - data_binned)/sumw_all_bkgs], fmt='o', ms=4, color='black', capsize=0, zorder=3)
 
 
-    def plot_systematics(self, cut_string, axes, variable, bins, systematics, do_mva=True, do_weight_systs=False):
+    def plot_systematics(self, cut_string, axes, variable, bins, systematics, do_mva=True):
         """ self explanatory """
         
+        from syst_maps import weight_systs
+
         #create and fill one Systematic object info for each syst FIXME FIXME (for each sample?)
         syst_objects = {}
         for syst_name in systematics:
-            syst_dfs = self.relabel_syst_vars(syst_name, cut_string, plot_var=variable)
-            print 'DEBUG: nominal vars '
-            print self.root_obj.mc_df_bkg[['leadJetEn', 'dijetMass', 'leadJetEta', 'leadElectronPtOvM']]
-            print 'DEBUG: syst up vars '
-            print syst_dfs['Up'][['leadJetEn', 'dijetMass', 'leadJetEta','leadElectronPtOvM']]
-            print 'DEBUG: syst down vars '
-            print syst_dfs['Down'][['leadJetEn', 'dijetMass', 'leadJetEta','leadElectronPtOvM']]
+            if syst_name in weight_systs.keys(): syst_dfs = self.get_weight_syst(syst_name, cut_string, plot_var=variable)
+            else: syst_dfs = self.relabel_syst_vars(syst_name, cut_string, plot_var=variable)
+            #print 'DEBUG: nominal vars '
+            #print self.root_obj.mc_df_bkg[['leadJetEn', 'dijetMass', 'leadJetEta', 'leadElectronPtOvM']]
+            #print 'DEBUG: syst up vars '
+            #print syst_dfs['Up'][['leadJetEn', 'dijetMass', 'leadJetEta','leadElectronPtOvM']]
+            #print 'DEBUG: syst down vars '
+            #print syst_dfs['Down'][['leadJetEn', 'dijetMass', 'leadJetEta','leadElectronPtOvM']]
             for syst_type in syst_dfs.keys():
                 syst_dfs[syst_type]['weight'] = syst_dfs[syst_type]['weight'].copy() * self.k_factor #FIXME check can remove the copy()
                 #syst_dfs[syst_type]['weight'] *= self.k_factor #FIXME check can remove the copy()
@@ -277,7 +280,15 @@ class DYPlotter(object):
                 for bkg_proc in self.root_obj.bkg_procs:
                     proc_frame       = i_frame[i_frame.proc==bkg_proc]
                     var_to_plot      = proc_frame[variable].values
-                    weight           = proc_frame['weight'].values
+                    weight           = proc_frame['weight'].values #will be shifted by weight syst if reading those in
+                    print 'DEBUG: len(var to plot) {}'.format(var_to_plot.shape)
+                    print var_to_plot
+                    print np.isnan(var_to_plot).any()
+                    print np.isinf(var_to_plot).any()
+                    print 'DEBUG: len(weight) {}'.format(weight.shape)
+                    print np.isnan(weight).any()
+                    print np.isinf(weight).any()
+                    print weight
                     i_syst_binned, _ = np.histogram(var_to_plot, bins=bins, weights=weight)
  
                     #compare variation to the nominal for given sample and fill bin list
@@ -328,17 +339,6 @@ class DYPlotter(object):
 
                 up_squares.append( syst_obj.down_syst_binned[bkg_proc][1]**2 )
                 up_squares.append( syst_obj.up_syst_binned[bkg_proc][1]**2 )
-
-        #FIXME
-        #if do_weight_systs:
-        #    from syst_maps import weight_systs
-        #    for syst_name in weight_systs.keys():
-        #        down_tag, nom_tag, up_tag = weight_systs[syst_name]['exts'][0], weight_systs[syst_name]['exts'][1], weight_systs[syst_name]['exts'][2]
-        #        weight_syst_up   = (self.root_obj.mc_df_bkg['{}{}'.format(syst_name,up_tag)] / self.root_obj.mc_df_bkg['{}{}'.format(syst_name,nom_tag)]) * self.root_obj.mc_df_bkg['centralObjectWeight'].copy()
-        #        weight_syst_down = (self.root_obj.mc_df_bkg['{}{}'.format(syst_name,down_tag)] / self.root_obj.mc_df_bkg['{}{}'.format(syst_name,nom_tag)]) * self.root_obj.mc_df_bkg['centralObjectWeight'].copy()
-        #        up_weight_syst_binned, _ = np.histogram(var_to_plot, bins=bins, weights=weight_syst_up)
-        #        down_weight_syst_binned, _ = np.histogram(var_to_plot, bins=bins, weights=weight_syst_down)
-        ##FIXME 
 
         #print 'down squares'
         #print down_squares
@@ -424,7 +424,8 @@ class DYPlotter(object):
         """  
              
         #import variables that may change with each systematic
-        from syst_maps import syst_map 
+        from syst_maps import syst_map
+
         syst_dfs = {}
         print '\n\n'
         print 'DEBUG: reading systematic: {}'.format(syst_name)
@@ -472,6 +473,24 @@ class DYPlotter(object):
             syst_dfs[ext] = df_copy
             print 'DEBUG syst {} df sumW after cuts: {}'.format(ext, np.sum(df_copy['weight']))
             #print 'DEBUG: for syst: {}, after cuts, nominal and {} diff are equal: {} !!'.format(syst_name, ext, np.array_equal(df_copy['leadJetEn'],self.root_obj.mc_df_bkg['leadJetEn']))
+        return syst_dfs
+
+    def get_weight_syst(self, syst_name, cut_string, plot_var,syst_types=['Up','Down']):
+        """
+        Compute the weight systematics and for up(down) syst return a df of the plot var, and up(down) varied weights, making sure to overwrite the nominal weight branch
+        """ 
+        from syst_maps import weight_systs
+
+        #create one df for each up/down variation
+        syst_dfs = {}
+        for ext in syst_types:
+            syst_dfs[ext] = self.root_obj.mc_df_bkg[[plot_var,'proc']+self.root_obj.train_vars]
+
+        #compute the weigth variations and add them to df
+        down_tag, nom_tag, up_tag = weight_systs[syst_name]['exts'][0], weight_systs[syst_name]['exts'][1], weight_systs[syst_name]['exts'][2]
+        syst_dfs['Up']['weight']   = (self.root_obj.mc_df_bkg['{}{}'.format(syst_name,up_tag)] / self.root_obj.mc_df_bkg['{}{}'.format(syst_name,nom_tag)]) * self.root_obj.mc_df_bkg['weight'].copy()
+        syst_dfs['Down']['weight'] = (self.root_obj.mc_df_bkg['{}{}'.format(syst_name,down_tag)] / self.root_obj.mc_df_bkg['{}{}'.format(syst_name,nom_tag)]) * self.root_obj.mc_df_bkg['weight'].copy()
+
         return syst_dfs
 
 

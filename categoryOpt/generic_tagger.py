@@ -67,9 +67,12 @@ def main(options):
             root_obj.mc_df_bkg = root_obj.data_df
         root_obj.concat()
 
-    #get year of samples for roob obj and check we didn't accidentally read in more than 1 year
-    if len(root_obj.years)!=1: raise IOError('Reading in more than one year at a time! Tagging should be split by year')
-    else: year = list(root_obj.years)[0]
+        #get year of samples for roob obj and check we didn't accidentally read in more than 1 year
+        if len(root_obj.years)!=1: raise IOError('Reading in more than one year at a time! Tagging should be split by year')
+        else: year = list(root_obj.years)[0]
+        if ("2016" in year) and (not options.data_only): root_obj.scale_sig_partial_2016() #FIXME: check this is actually called
+        
+
 
     #if read_syst: combined_df = root_obj.mc_df_sig doesnt work with DNN set up since need bkg class in _init_ 
     #else: combined_df = pd.concat([root_obj.mc_df_sig, root_obj.mc_df_bkg])
@@ -81,6 +84,7 @@ def main(options):
 
     tag_sequence      = ['VBF','ggH'] #categories targetted
     true_procs        = ['VBF','ggH', 'ttH'] #procs to run through cats
+    #true_procs        = ['ggH', 'ttH'] #procs to run through cats
     if (not read_syst) and (not options.dump_weight_systs) : true_procs.append('Data') #is this line needed? guess so since could run mc and data together in a stat-only config
     if options.data_only: true_procs = ['Data'] #do data on its own (for memory really)
 

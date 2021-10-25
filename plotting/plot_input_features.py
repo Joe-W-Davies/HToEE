@@ -29,6 +29,7 @@ def main(options):
         sig_colour        = 'red'
  
                                            #Data handling stuff#
+        sys.exit(1)
 
         #load the mc dataframe for all years
         if options.pt_reweight: 
