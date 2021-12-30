@@ -14,9 +14,9 @@ class DYPlotter(object):
     :type : ROOTHelpers
     :param cut_map: dictionary of form {variable_name:cut_applied}
     :type : dict
-    :param mc_total: binned mc for the variable being plot
+    :param mc_total: binned mc for the variable being plot. Note that the weights used in this sum are reweighted by pT
     :type : numpy 1D array
-    :param mc_total: binned mc for the variable being plot for a given bkg process 
+    :param mc_totals_no_pt_rew: binned mc for the variable being plot for a given bkg process Note that the weights used in this sum are NOT reweighted by pT
     :type : numpy 1D array
     :param mc_stat_uncs: statistical uncertainties for each bin. First entry is array of lower bounds,
      second is array of upper bounds
@@ -30,18 +30,69 @@ class DYPlotter(object):
     """
 
     def __init__(self, root_obj, cut_map): 
-        self.root_obj       = root_obj
-        self.cut_map        = cut_map
+        self.root_obj             = root_obj    
+        self.cut_map              = cut_map
 
-        self.mc_total       = None
-        self.mc_totals      = {}
-	self.mc_stat_uncs   = None
-	self.k_factor       = None
-        self.clf            = None
-        self.proc           = None
-        #self.colours        = ['lightgrey','#CBCBE5'] #VBF
-        self.colours        = ['#CBCBE5'] #ggH
+        self.mc_total             = None
+        self.mc_totals_no_pt_rew  = {}
+	self.mc_stat_uncs         = None
+	self.k_factor             = None
+        self.clf                  = None
+        self.proc                 = None
+        self.colours              = ['lightgrey','#CBCBE5'] #VBF
+        #self.colours              = ['#CBCBE5'] #ggH
 
+    def read_and_concat_dfs(self, reload_samples):
+        """ read in dfs """
+
+        for bkg_obj in self.root_obj.bkg_objects:
+            self.root_obj.load_mc(bkg_obj, bkg=True, reload_samples=reload_samples)
+        for data_obj in self.root_obj.data_objects:
+            self.root_obj.load_data(data_obj, reload_samples=reload_samples)
+        self.root_obj.concat()
+
+        print 'bkg mc variables'
+        print self.root_obj.mc_df_bkg.columns[:]
+        print 'data variables'
+        print self.root_obj.data_df.columns[:]
+
+    def remove_unused_vars(self, variable_to_plot, systs_read):
+        """ remove variables and syst not needed for plotting before anything is read in. Bit clunky with the objects but it works and doesn't take ages """
+
+        from syst_maps import syst_map, weight_systs
+
+        #remove unused variables in data
+        if ('mva' in variable_to_plot): used_variables = self.root_obj.train_vars + self.cut_map.keys() + ['dielectronPt', 'weight']
+        else: used_variables = [variable_to_plot] + self.cut_map.keys() + ['dielectronPt', 'weight']
+
+        #have to reset the used variable flag for all our attributes. Note that year dependent systs will be lost here depending on what first sample object is... but ok fine these are small anyway
+        new_data_sample_objects = []
+        for i in range(len(self.root_obj.data_objects)):
+            i_obj = self.root_obj.data_objects[i]
+            i_obj.vars_to_read = used_variables
+            new_data_sample_objects.append(i_obj)
+        self.root_obj.data_objects = new_data_sample_objects
+
+        #now add syst and gen stuff and remove mc vars
+        mc_used_variables =  used_variables[:] + ['genWeight', 'centralObjectWeight']
+
+        for direction in ['Up', 'Down']:
+            for syst_read in systs_read:
+                if syst_read+direction in syst_map.keys():
+                    mc_used_variables += [var_name+'_'+syst_read+direction for var_name in syst_map[syst_read+direction] if var_name in mc_used_variables]
+
+        for weight_syst in weight_systs.keys():
+            #if year in weight_systs[weight_syst]['years']: final_mc_vars += [weight_syst+ext for ext in weight_systs[weight_syst]['exts']]
+            if weight_syst in systs_read:
+                mc_used_variables += [weight_syst+ext for ext in weight_systs[weight_syst]['exts']]
+
+        #have to reset the used variable flag for all our attributes. Note that year dependent systs will be lost here depending on what first sample object is... but ok fine these are small anyway
+        new_bkg_sample_objects = []
+        for i in range(len(self.root_obj.bkg_objects)):
+            i_obj = self.root_obj.bkg_objects[i]
+            i_obj.vars_to_read = mc_used_variables
+            new_bkg_sample_objects.append(i_obj)
+        self.root_obj.bkg_objects = new_bkg_sample_objects
 
     def pt_reweight(self):
         """
@@ -75,7 +126,8 @@ class DYPlotter(object):
             del presel_mc
             del presel_data
                 
-            pt_bins = np.linspace(0,180,101)
+            pt_bins = np.linspace(0,400,61) #VBF
+            #pt_bins = np.linspace(0,180,101) #ggH
             mc_pt_summed, _ = np.histogram(dy_mc_pt, bins=pt_bins, weights=dy_w)
             data_pt_summed, bin_edges = np.histogram(dy_data_pt, bins=pt_bins)
             year_to_scale_factors[year] = data_pt_summed/mc_pt_summed
@@ -87,37 +139,35 @@ class DYPlotter(object):
             
         scaled_dfs = []
         for year in self.root_obj.years:
-            df_year_i = self.root_obj.mc_df_bkg.query(all_selection+'and year=="{}"'.format(year))
+            df_year_i = self.root_obj.mc_df_bkg.query(self.root_obj.cut_string+'and year=="{}"'.format(year))
             scale_factors = year_to_scale_factors[year]
             for i_bin in range(len(scale_factors)-1):
                 temp_df = df_year_i[df_year_i.dielectronPt > bin_edges[i_bin]] 
                 temp_df = temp_df[temp_df.dielectronPt < bin_edges[i_bin+1]] 
-                temp_df['weight'] *= scale_factors[i_bin]
+                #temp_df['weight'] *= scale_factors[i_bin]
+                temp_df['pt_weight'] = temp_df['weight'].copy() * scale_factors[i_bin]
                 scaled_dfs.append(temp_df)  
                 print 'DEBUG: for pT bin: {} to {}, applying SF of {}'.format(bin_edges[i_bin],bin_edges[i_bin+1], scale_factors[i_bin])
  
             the_rest = self.root_obj.mc_df_bkg[self.root_obj.mc_df_bkg.dielectronPt > bin_edges[-1]]
+            the_rest['pt_weight'] = the_rest['weight']
             scaled_dfs.append(the_rest)
               
         self.root_obj.mc_df_bkg = pd.concat(scaled_dfs, ignore_index=True)
         del scaled_dfs
 
-        print 'DEBUG: sumW Data: {}'.format(np.sum(self.root_obj.data_df['weight']))
-        print 'DEBUG: sumW background after pT reweighting: {}'.format(np.sum(self.root_obj.mc_df_bkg['weight']))
+        print 'DEBUG: sumW Data: {}'.format(np.sum(self.root_obj.data_df.query(all_selection)['weight']))
+        print 'DEBUG: sumW background after pT reweighting: {}'.format(np.sum(self.root_obj.mc_df_bkg.query(all_selection)['weight']))
  
         for year in self.root_obj.years:
             self.root_obj.save_modified_dfs(year, ignore_sig=True)
 
-    def manage_memory(self, systematics, save=False, syst_types=['Up','Down']):
-        """
-        Delete dataframe columns that are not needed for data and mc. Also chanege data types to remove precision where possible.
+       
 
-        Could also delete systs that are not used (since atm only removing nominal vars but still reading nonimal+syst in because of config format)
+    def manage_dtypes(self, systematics, save=False, syst_types=['Up','Down']):
         """
-
-        mc_df_mem = self.root_obj.mc_df_bkg.memory_usage(deep=True).sum() / 1000                                            
-        data_df_mem = self.root_obj.data_df.memory_usage(deep=True).sum() / 1000                                            
-        print('Initial memory usage is {} GB'.format(mc_df_mem+data_df_mem))
+        Change data types to remove precision (and memory use) where possible.
+        """
 
         from syst_maps import syst_map 
 
@@ -158,31 +208,11 @@ class DYPlotter(object):
             for year in self.root_obj.years:
                 self.root_obj.save_modified_dfs(year, ignore_sig=True)
           
-        #remove unused variables - need to do this after saving since will be differ deoending on variable being plot
-        used_variables = self.root_obj.train_vars+self.cut_map.keys()+['weight']+['proc']+['centralObjectWeight']
-        for col in self.root_obj.data_df.columns: #looping through data columns wont so we dont delete systs
-            if col not in used_variables: 
-                del self.root_obj.mc_df_bkg[col]
-                del self.root_obj.data_df[col]
-
-        #dont need sigma_m/m for these plots either
-        #if 'centralObjectWeight' in self.root_obj.mc_df_bkg.columns: del self.root_obj.mc_df_bkg['centralObjectWeight']
-        #if 'centralObjectWeight' in self.root_obj.data_df.columns: del self.root_obj.data_df['centralObjectWeight']
-        if 'sigmaMoM' in self.root_obj.mc_df_bkg.columns: del self.root_obj.mc_df_bkg['sigmaMoM']
-        if 'sigmaMoM' in self.root_obj.data_df.columns: del self.root_obj.data_df['sigmaMoM']
-
-        mc_df_mem = self.root_obj.mc_df_bkg.memory_usage(deep=True).sum() / 1000                                            
-        data_df_mem = self.root_obj.data_df.memory_usage(deep=True).sum() / 1000                                            
-        print('Final memory usage is {} GB'.format(mc_df_mem+data_df_mem))
-        print 'dtypes: {}'.format(self.root_obj.mc_df_bkg.dtypes[:])
 
     def plot_data(self, cut_string, axes, variable, bins):
-        """ will add this later """
+        """ Plot the data """
 
-        print 'DEBUG: cut string is: {}'.format(cut_string)
-        print 'DEBUG: sum of hist BEFORE CUTS: {}, for data is: {}'.format(variable,np.sum(self.root_obj.data_df['weight'].values))
         cut_df             = self.root_obj.data_df.query(cut_string)
-        print 'DEBUG: sum of hist AFTER CUTS: {}, for data is: {}'.format(variable,np.sum(cut_df['weight']))
         var_to_plot        = cut_df[variable].values
         var_weights        = cut_df['weight'].values
         del cut_df
@@ -205,7 +235,10 @@ class DYPlotter(object):
         return data_binned, bin_centres, (data_stat_down, data_stat_up)
 
     def plot_bkgs(self, cut_string, axes, variable, bins, data_binned, bin_centres, data_stat_down_up):
-        """ self explanatory """
+        """ 
+        Nominal MC hist and stat errors should be constructed with pT rew weights.
+        Keep a set of MC sumw's for comparison to systs as wekl
+        """
 
        
         bkg_frame = self.root_obj.mc_df_bkg.query(cut_string)
@@ -213,10 +246,10 @@ class DYPlotter(object):
 
         #get norm factor
         var_to_plot_all_bkgs  = bkg_frame[variable].values
-        var_weights_all_bkgs  = bkg_frame['weight'].values 
+        var_weights_all_bkgs  = bkg_frame['pt_weight'].values 
         sumw_all_bkgs, _      = np.histogram(var_to_plot_all_bkgs, bins=bins, weights=var_weights_all_bkgs)
         self.k_factor         = np.sum(data_binned)/np.sum(sumw_all_bkgs)
-        sumw_all_bkgs        *= self.k_factor
+        sumw_all_bkgs        *= self.k_factor #NOTE: still need this for ggH since nominal phase space which SFs are dervied in, is different to phase space of variables requiring > 0J! So norm will be off in those
 
         #Set up stat unc arrays to add to
         stat_down_all_bkgs = np.zeros(len(bins)-1)
@@ -224,22 +257,25 @@ class DYPlotter(object):
 
         #plot each proc and add up stat uncertainties
         for counter, bkg_proc in enumerate(self.root_obj.bkg_procs):
-            proc_frame        = bkg_frame[bkg_frame.proc==bkg_proc]
-            var_to_plot       = proc_frame[variable].values
-            var_weights       = proc_frame['weight'].values 
+            proc_frame            = bkg_frame[bkg_frame.proc==bkg_proc]
+            var_to_plot           = proc_frame[variable].values
+            var_no_pt_rew_weights = proc_frame['weight'].values 
+            var_weights           = proc_frame['pt_weight'].values 
             del proc_frame
 
-            var_weights              *= self.k_factor
-            sumw, _                   = np.histogram(var_to_plot, bins=bins, weights=var_weights)
-            self.mc_totals[bkg_proc]  = sumw
-            sumw2, _                  = np.histogram(var_to_plot, bins=bins, weights=var_weights**2)
-            stat_down, stat_up        = self.poisson_interval(sumw, sumw2)
-            stat_down_all_bkgs       += stat_down
-            stat_up_all_bkgs         += stat_up
-
+            var_weights          *= self.k_factor #NOTE: see above note. This is only for plotting and MC stat errors, not syst evaluation, as is the case with all reweightings
+            sumw, _               = np.histogram(var_to_plot, bins=bins, weights=var_weights)
+            #self.mc_totals_pt_re[bkg_proc]  = sumw
+            sumw2, _              = np.histogram(var_to_plot, bins=bins, weights=var_weights**2)
+            stat_down, stat_up    = self.poisson_interval(sumw, sumw2)
+            stat_down_all_bkgs    += stat_down
+            stat_up_all_bkgs      += stat_up
             print '--> Integral of hist: {}, for background proc {} is: {}'.format(variable, bkg_proc, np.sum(sumw))
             axes[0].hist(var_to_plot, bins=bins, label=bkg_proc, weights=var_weights, color=self.colours[counter], histtype='stepfilled')
 
+            #for syst stuff later on:
+            no_pt_rew_sumw, _                      = np.histogram(var_to_plot, bins=bins, weights=var_no_pt_rew_weights)
+            self.mc_totals_no_pt_rew[bkg_proc] = no_pt_rew_sumw
 
         self.mc_stat_unc          = [sumw_all_bkgs-stat_down_all_bkgs, stat_up_all_bkgs-sumw_all_bkgs]
         self.mc_total             = sumw_all_bkgs
@@ -256,22 +292,22 @@ class DYPlotter(object):
         #create and fill one Systematic object info for each syst FIXME FIXME (for each sample?)
         syst_objects = {}
         for syst_name in systematics:
-            if syst_name in weight_systs.keys(): syst_dfs = self.get_weight_syst(syst_name, cut_string, plot_var=variable)
+            if syst_name in weight_systs.keys(): syst_dfs = self.get_weight_syst(syst_name, cut_string, plot_var=variable, do_mva=do_mva)
             else: syst_dfs = self.relabel_syst_vars(syst_name, cut_string, plot_var=variable)
             #print 'DEBUG: nominal vars '
-            #print self.root_obj.mc_df_bkg[['leadJetEn', 'dijetMass', 'leadJetEta', 'leadElectronPtOvM']]
+            #print self.root_obj.mc_df_bkg['dielectronPt']
             #print 'DEBUG: syst up vars '
-            #print syst_dfs['Up'][['leadJetEn', 'dijetMass', 'leadJetEta','leadElectronPtOvM']]
+            #print syst_dfs['Up']['dielectronPt']
             #print 'DEBUG: syst down vars '
-            #print syst_dfs['Down'][['leadJetEn', 'dijetMass', 'leadJetEta','leadElectronPtOvM']]
+            #print syst_dfs['Down']['dielectronPt']
             for syst_type in syst_dfs.keys():
-                syst_dfs[syst_type]['weight'] = syst_dfs[syst_type]['weight'].copy() * self.k_factor #FIXME check can remove the copy()
-                #syst_dfs[syst_type]['weight'] *= self.k_factor #FIXME check can remove the copy()
+                #syst_dfs[syst_type]['weight'] = syst_dfs[syst_type]['weight'].copy() * self.k_factor #FIXME can remove this
+                #syst_dfs[syst_type]['weight'] *= self.k_factor #FIXME check can remove the copy() #FIXME
                 if do_mva: syst_dfs[syst_type][self.proc+'_mva'] = self.eval_bdt(self.clf, syst_dfs[syst_type], self.root_obj.train_vars)
             syst_objects[syst_name] = Systematic(syst_name, down_frame=syst_dfs['Down'], up_frame=syst_dfs['Up'])
             #print 'DEBUG: for syst: {}, MVA up/down diff are equal: {} !!'.format(syst_name, np.array_equal(syst_dfs['Up'][self.proc+'_mva'],syst_dfs['Down'][self.proc+'_mva']))
-            print 'DEBUG: for syst: {}, leadJetEn up/down diff are equal: {} !!'.format(syst_name, np.array_equal(syst_dfs['Up']['leadJetEn'],syst_dfs['Down']['leadJetEn']))
-            if do_mva: print 'DEBUG: for syst: {}, leadPtOvM up/down diff are equal: {} !!'.format(syst_name, np.array_equal(syst_dfs['Up']['leadElectronPtOvM'],syst_dfs['Down']['leadElectronPtOvM']))
+            #print 'DEBUG: for syst: {}, leadJetEn up/down diff are equal: {} !!'.format(syst_name, np.array_equal(syst_dfs['Up']['leadJetEn'],syst_dfs['Down']['leadJetEn']))
+            #if do_mva: print 'DEBUG: for syst: {}, leadPtOvM up/down diff are equal: {} !!'.format(syst_name, np.array_equal(syst_dfs['Up']['leadElectronPtOvM'],syst_dfs['Down']['leadElectronPtOvM']))
             del syst_dfs
             
         for syst_name, syst_obj in syst_objects.iteritems():
@@ -279,17 +315,17 @@ class DYPlotter(object):
             for syst_type, i_frame in syst_obj.up_down_frames.iteritems():
                 for bkg_proc in self.root_obj.bkg_procs:
                     proc_frame       = i_frame[i_frame.proc==bkg_proc]
+                    print 'DEBUG: syst frame columns {}'.format(proc_frame.columns[:])
                     var_to_plot      = proc_frame[variable].values
                     weight           = proc_frame['weight'].values #will be shifted by weight syst if reading those in
-                    print 'DEBUG: len(var to plot) {}'.format(var_to_plot.shape)
-                    print var_to_plot
-                    print np.isnan(var_to_plot).any()
-                    print np.isinf(var_to_plot).any()
-                    print 'DEBUG: len(weight) {}'.format(weight.shape)
-                    print np.isnan(weight).any()
-                    print np.isinf(weight).any()
-                    print weight
                     i_syst_binned, _ = np.histogram(var_to_plot, bins=bins, weights=weight)
+                    print 'HONK PART 2:'
+                    print 'shifted weight'
+                    print weight
+                    print 'variable:'
+                    print var_to_plot
+                    print 'nomainal variable:'
+                    print self.root_obj.mc_df_bkg.query(cut_string)[variable]
  
                     #compare variation to the nominal for given sample and fill bin list
                     true_down_variations  = []
@@ -300,10 +336,9 @@ class DYPlotter(object):
                     print 'i_syst binned:'
                     print i_syst_binned
                     print 'mc total for proc'
-                    print  self.mc_totals[bkg_proc]
+                    print  self.mc_totals_no_pt_rew[bkg_proc]
                     #compare the systematic change to the !nominal! bin entries for that proc.
-                    #for ybin_syst, ybin_nominal in zip(i_syst_binned, self.mc_total):
-                    for ybin_syst, ybin_nominal in zip(i_syst_binned, self.mc_totals[bkg_proc]):
+                    for ybin_syst, ybin_nominal in zip(i_syst_binned, self.mc_totals_no_pt_rew[bkg_proc]):
                       if ybin_syst > ybin_nominal: 
                         true_up_variations.append(ybin_syst - ybin_nominal)
                         true_down_variations.append(0)
@@ -371,7 +406,11 @@ class DYPlotter(object):
         merged_downs = np.sqrt( syst_merged_downs + self.mc_stat_unc[0]**2) 
         merged_ups   = np.sqrt( syst_merged_ups   + self.mc_stat_unc[1]**2) 
 
-        #FIXME switch below and above fixme's if wanting stat only
+        #FIXME syst only
+        #merged_downs = np.sqrt( syst_merged_downs) 
+        #merged_ups   = np.sqrt( syst_merged_ups  ) 
+
+        #FIXME stat only
         #merged_downs = np.sqrt( self.mc_stat_unc[0]**2) 
         #merged_ups   = np.sqrt( self.mc_stat_unc[1]**2) 
 
@@ -389,7 +428,11 @@ class DYPlotter(object):
         up_yield[up_yield==np.inf] = 0
         down_yield = self.mc_total - merged_downs
 
+        print 'up yield final: {}'.format(up_yield)
+        print 'down yield final: {}'.format(down_yield)
+
         axes[0].fill_between(bins, list(down_yield)+[down_yield[-1]], list(up_yield)+[up_yield[-1]], alpha=0.3, step="post", color="lightcoral", lw=1, edgecolor='red', zorder=4, label='Simulation stat. $\oplus$ syst. unc.')
+        axes[0].set_ylim(bottom=0)
 
         #total_mc             = self.mc_total
         sigma_tot_ratio_down = merged_downs/self.mc_total
@@ -413,6 +456,7 @@ class DYPlotter(object):
         #ratio_down_excess[ratio_down_excess==0] =1
         
         axes[1].fill_between(bins, list(ratio_down_excess)+[ratio_down_excess[-1]], list(ratio_up_excess)+[ratio_up_excess[-1]] , alpha=0.3, step="post", color="lightcoral", lw=1 , zorder=2)
+        axes[1].set_ylabel('Data/MC', size=13)
 
 
     def relabel_syst_vars(self, syst_name, cut_string, plot_var, syst_types=['Up','Down']):
@@ -475,7 +519,7 @@ class DYPlotter(object):
             #print 'DEBUG: for syst: {}, after cuts, nominal and {} diff are equal: {} !!'.format(syst_name, ext, np.array_equal(df_copy['leadJetEn'],self.root_obj.mc_df_bkg['leadJetEn']))
         return syst_dfs
 
-    def get_weight_syst(self, syst_name, cut_string, plot_var,syst_types=['Up','Down']):
+    def get_weight_syst(self, syst_name, cut_string, plot_var, syst_types=['Up','Down'], do_mva=True):
         """
         Compute the weight systematics and for up(down) syst return a df of the plot var, and up(down) varied weights, making sure to overwrite the nominal weight branch
         """ 
@@ -484,12 +528,28 @@ class DYPlotter(object):
         #create one df for each up/down variation
         syst_dfs = {}
         for ext in syst_types:
-            syst_dfs[ext] = self.root_obj.mc_df_bkg[[plot_var,'proc']+self.root_obj.train_vars]
+            if do_mva: 
+                train_vars_minus_plot_var = [v for v in self.root_obj.train_vars if v!=plot_var] #protect against usual case where plot var is contained in training variable set
+                cut_vars += [v for v in self.cut_map.keys() if (v not in (train_vars_minus_plot_var+plot_var))]
+                final_vars = cut_vars + train_vars_minus_plot_var
+                syst_dfs[ext] = self.root_obj.mc_df_bkg[[plot_var]+['proc']+final_vars] 
+            else: 
+                final_vars = [v for v in self.cut_map.keys() if v!=plot_var]
+                syst_dfs[ext] = self.root_obj.mc_df_bkg[[plot_var,'proc']+final_vars]
+                
 
         #compute the weigth variations and add them to df
         down_tag, nom_tag, up_tag = weight_systs[syst_name]['exts'][0], weight_systs[syst_name]['exts'][1], weight_systs[syst_name]['exts'][2]
         syst_dfs['Up']['weight']   = (self.root_obj.mc_df_bkg['{}{}'.format(syst_name,up_tag)] / self.root_obj.mc_df_bkg['{}{}'.format(syst_name,nom_tag)]) * self.root_obj.mc_df_bkg['weight'].copy()
         syst_dfs['Down']['weight'] = (self.root_obj.mc_df_bkg['{}{}'.format(syst_name,down_tag)] / self.root_obj.mc_df_bkg['{}{}'.format(syst_name,nom_tag)]) * self.root_obj.mc_df_bkg['weight'].copy()
+
+        print 'HONK: CUT STRING (should be full list of compiled cuts in this function)'
+        print cut_string
+        print 'End of HONK'
+
+        syst_dfs['Up'].query(cut_string, inplace=True)
+        syst_dfs['Down'].query(cut_string, inplace=True)
+
 
         return syst_dfs
 
@@ -538,7 +598,7 @@ class DYPlotter(object):
         axes[0].set_ylabel('Events / {0:.2g}'.format(2*x_err) , size=14, ha='right', y=1)
         #if variable.norm: axes[0].set_ylabel('1/N dN/d(%s) /%.2f' % (variable.xlabel,x_err, ha='right', y=1)
         axes[0].text(0, 1.01, r'\textbf{CMS} %s'%label, ha='left', va='bottom', transform=axes[0].transAxes, size=14)
-        axes[0].text(1, 1.01, r'137 fb\textsuperscript{-1} (%s)'%(energy), ha='right', va='bottom', transform=axes[0].transAxes, size=14)
+        axes[0].text(1, 1.01, r'138 fb\textsuperscript{-1} (%s)'%(energy), ha='right', va='bottom', transform=axes[0].transAxes, size=14)
         #axes[0].text(1, 1.01, r'59.7 fb\textsuperscript{-1} (%s)'%(energy), ha='right', va='bottom', transform=axes[0].transAxes, size=14)
         #axes[0].text(1, 1.01, r'41.5 fb\textsuperscript{-1} (%s)'%(energy), ha='right', va='bottom', transform=axes[0].transAxes, size=14)
         #axes[0].text(1, 1.01, r'35.9 fb\textsuperscript{-1} (%s)'%(energy), ha='right', va='bottom', transform=axes[0].transAxes, size=14)

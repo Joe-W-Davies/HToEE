@@ -46,38 +46,20 @@ def main(options):
         presel              = config['preselection']
         cut_map             = config['cut_map']
 
+        #--------------------------------------------------------------------------------------------------
                                            #Data handling stuff#
  
-        #get the dataframe for all years. Do not apply any specific preselection to sim samples
-        root_obj = ROOTHelpers(output_tag, mc_dir, mc_fnames, data_dir, data_fnames, proc_to_tree_name, all_train_vars, vars_to_add, presel, read_systs=True)
-
-        #for sig_obj in root_obj.sig_objects:
-        #    root_obj.load_mc(sig_obj, reload_samples=options.reload_samples)
-        for bkg_obj in root_obj.bkg_objects:
-            root_obj.load_mc(bkg_obj, bkg=True, reload_samples=options.reload_samples)
-        for data_obj in root_obj.data_objects:
-            root_obj.load_data(data_obj, reload_samples=options.reload_samples)
-        root_obj.concat()
-
-
-        #--------------------------------------------------------------------------------------------------
-
-
+        #get the dataframe for all years. Do not apply any tight preselection to sim samples. Bit clunky with classes at the moment but finally fixed all the bugs
+        root_obj   = ROOTHelpers(output_tag, mc_dir, mc_fnames, data_dir, data_fnames, proc_to_tree_name, all_train_vars, vars_to_add, presel, read_systs=True)
         dy_plotter = DYPlotter(root_obj,cut_map)
+        dy_plotter.remove_unused_vars(options.var_name, options.systematics)
+        dy_plotter.read_and_concat_dfs(options.reload_samples)
+        dy_plotter.manage_dtypes(options.systematics, options.reload_samples)
+
         if options.reload_samples: #FIXME: reading in for the first time  wont re-weight sample! (OR BEING READ IN THE FOR THE FIRST TIME) (or get the reload samples flag out of the DataHandler object since trigger if no sample exist
             dy_plotter.pt_reweight()
-        #FIXME still need this else dont remove variables again!
-        dy_plotter.manage_memory(options.systematics, save=options.reload_samples)
-
-        #DEBUG
-        print 'Background columns'
-        print root_obj.mc_df_bkg.columns[:]
-     
-        print 'Background columns'
-        print root_obj.data_df.columns[:]
 
         if (options.var_name is None) or ('mva' in options.var_name.lower()): dy_plotter.eval_mva(options.mva_config, output_tag) #little bit hard coded - be careful if 'mva' not in MVA ouput name. Below line is safer but longer.
-        #dy_plotter.eval_mva(options.mva_config, output_tag)
         #--------------------------------------------------------------------------------------------------
 
         with open('plotting/var_to_xrange.yaml', 'r') as plot_config_file:
