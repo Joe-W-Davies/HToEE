@@ -16,25 +16,28 @@ data_file_dir:
 mc_file_names:
     sig:
         VBF:
-            '2016B': 'VBFB_UL2016.root'
+            '2016B': 'VBF_UL2016B.root'
+        VH:
+            '2016B': 'VH_UL2016B.root'
         ggH:
-            '2016B': 'ggHB_UL2016.root'
+            '2016B': 'ggH_UL2016B.root'
         ttH:
-            '2016B': 'ttHB_UL2016.root'
+            '2016B': 'ttH_UL2016B.root'
             
             
     bkg:
         DYMC:
-            '2016B': 'DYB_UL2016.root' #not used here!
+            '2016B': 'DY_UL2016B.root' #not used here!
 
 data_file_names:
     Data:
-        '2016B': 'DataB_UL2016.root'
+        '2016B': 'Data_UL2016B.root'
 
 #.root files for all years should have these tree paths. Keys should match keys above
 proc_to_tree_name:
     VBF:  'Events'
     ggH:  'Events'
+    VH:   'Events'
     ttH:  'Events'
     DYMC: 'Events'
     Data: 'Events'

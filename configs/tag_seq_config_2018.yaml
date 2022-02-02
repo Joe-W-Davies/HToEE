@@ -17,6 +17,8 @@ mc_file_names:
     sig:
         VBF:
             '2018': 'VBF_UL2018.root'
+        VH:
+            '2018': 'VH_UL2018.root'
         ggH:
             '2018': 'ggH_UL2018.root'
         ttH:
@@ -33,6 +35,7 @@ data_file_names:
 #.root files for all years should have these tree paths. Keys should match keys above
 proc_to_tree_name:
     VBF:  'Events'
+    VH:   'Events'
     ggH:  'Events'
     ttH:  'Events'
     DYMC: 'Events'

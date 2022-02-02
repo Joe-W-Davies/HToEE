@@ -56,6 +56,7 @@ train_vars:
     ] 
 
 vars_to_add:
+    'pt_weight':
 
 # "baseline" selection that will be applied to all samples. None of these variables should be inputs!
 preselection: #NOTE: dont include upper bounds in this string! and keep the lower bounds loose

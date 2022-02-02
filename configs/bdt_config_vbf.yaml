@@ -13,31 +13,37 @@ data_file_dir:
 mc_file_names:
     sig:
         VBF:
-            '2016': 'VBF_UL2016.root'
+            '2016A': 'VBF_UL2016A.root'
+            '2016B': 'VBF_UL2016B.root'
             '2017': 'VBF_UL2017.root'
             '2018': 'VBF_UL2018.root'
     bkg:
         DYMC:
-            '2016': 'DY_UL2016.root'
+            '2016A': 'DY_UL2016A.root'
+            '2016B': 'DY_UL2016B.root'
             '2017': 'DY_UL2017.root' 
             '2018': 'DY_UL2018.root'
 
         TT2L2Nu:
-            '2016': 'TTLNu_UL2016.root'
+            '2016A': 'TTLNu_UL2016A.root'
+            '2016B': 'TTLNu_UL2016B.root'
             '2017': 'TTLNu_UL2017.root'
             '2018': 'TTLNu_UL2018.root'
         TTSemiL:
-            '2016': 'TTSemi_UL2016.root'
+            '2016A': 'TTSemi_UL2016A.root'
+            '2016B': 'TTSemi_UL2016B.root'
             '2017': 'TTSemi_UL2017.root'
             '2018': 'TTSemi_UL2018.root' 
         EWKZ:
-            '2016': 'EWKZ_2017.root' #dont have 2016 atm
+            '2016A': 'EWKZ_2017.root' #dont have 2016 atm
+            '2016B': 'EWKZ_2017.root' #dont have 2016 atm
             '2017': 'EWKZ_2017.root'
             '2018': 'EWKZ_2018.root'
 
 data_file_names:
     Data:
-        '2016': 'Data_UL2016.root'
+        '2016A': 'Data_UL2016A.root'
+        '2016B': 'Data_UL2016B.root'
         '2017': 'Data_UL2017.root'
         '2018': 'Data_UL2018.root'
 

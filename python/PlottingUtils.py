@@ -28,9 +28,10 @@ class Plotter(object):
         self.sig_labels   = np.unique(self.sig_df['proc'].values).tolist()
         self.bkg_labels   = np.unique(self.bkg_df['proc'].values).tolist()
 
-        self.bkg_labels   = ['EWKZ', 'DYMC', 'TT2L2Nu', 'TTSemiL'] #FIXME: temp re-ordering of procs for VBF
-        self.bkg_colours  = ['#2c7bb6', '#abd9e9', '#ffffbf', '#fdae61'] #temo better for VBF
+        self.bkg_labels   = ['EWKZ', 'DYMC', 'TT2L2Nu', 'TTSemiL'] # temp re-ordering of procs for VBF
+        self.bkg_colours  = ['#2c7bb6', '#abd9e9', '#ffffbf', '#fdae61'] # temp better for VBF
         #self.bkg_colours  = ['#91bfdb', '#ffffbf', '#fc8d59'] #better for ggH
+        #self.bkg_colours  = ['#abd9e9', '#ffffbf', '#fc8d59'] #better for ggH
 
         self.sig_colour   = sig_col
         self.normalise    = normalise
@@ -46,6 +47,11 @@ class Plotter(object):
         with open('plotting/var_to_xstring.yaml', 'r') as plot_config_file:
             plot_string_cfg    = yaml.load(plot_config_file)
             self.var_to_xstring = plot_string_cfg['var_to_xstring']
+
+        #get proc name -> legend entry replacements from yaml config
+        with open('plotting/proc_to_legend_name.yaml', 'r') as plot_config_file:
+            plot_proc_cfg    = yaml.load(plot_config_file)
+            self.proc_to_leg = plot_proc_cfg['proc_to_leg_name']
             
         missing_vars = [x for x in input_vars if x not in self.var_to_xrange.keys()]
         if len(missing_vars)!=0: raise IOError('Missing variables in var_to_xrange.py: {}'.format(missing_vars))
@@ -72,7 +78,7 @@ class Plotter(object):
         exponent = len(str_rep)-2 #minus one for the decimal point counted in string length
         return r'$\times 10^{-%s}$'%(exponent)
 
-    def plot_input(self, var, n_bins, out_label, ratio_plot=False, norm_to_data=False, extra_cuts=None, extra_tag=None, blind=False):
+    def plot_input(self, var, n_bins, out_label, ratio_plot=False, norm_to_data=False, extra_cuts=None, extra_tag=None, blind=False, return_props=False):
         if blind and ('dielectronMass' not in var): raise IOError('blinding only configured for plotting dielectron Mass!')
         if ratio_plot: 
             plt.rcParams.update({'figure.figsize':(6,5.8)})
@@ -116,7 +122,7 @@ class Plotter(object):
 
         #add sig mc
         #NOTE add this back in if not doing blinded mee plots
-        axes.hist(var_sig, bins=bins, label=self.sig_labels[0]+r' ($\mathrm{H}\rightarrow\mathrm{ee}$) '+self.num_to_str(self.sig_scaler), weights=sig_weights*(self.sig_scaler), histtype='step', color=self.sig_colour, zorder=10)
+        axes.hist(var_sig, bins=bins, label=self.proc_to_leg[self.sig_labels[0]]+r' ($\mathrm{H}\rightarrow\mathrm{ee}$) '+self.num_to_str(self.sig_scaler), weights=sig_weights*(self.sig_scaler), histtype='step', color=self.sig_colour, zorder=10)
 
         #data
         if extra_cuts is not None:  data_binned, bin_edges = np.histogram(self.data_df.query(extra_cuts)[var].values, bins=bins)
@@ -137,20 +143,22 @@ class Plotter(object):
             axes.errorbar( bin_centres, blinded_data_binned, yerr=[blinded_data_binned-blinded_data_down, blinded_data_up-blinded_data_binned], label='Data', fmt='o', ms=3, color='black', capsize=0, zorder=1)
         else: axes.errorbar( bin_centres, data_binned, yerr=[data_binned-data_down, data_up-data_binned], label='Data', fmt='o', ms=3, color='black', capsize=0, zorder=1)
 
+
         #add stacked bkg
+        bkg_proc_stack_leg = [self.proc_to_leg[proc] for proc in bkg_proc_stack]
         if norm_to_data: 
             rew_stack = []
             bkg_stack_summed, _ = np.histogram(np.concatenate(bkg_stack), bins=bins, weights=np.concatenate(bkg_w_stack))
             k_factor = np.sum(data_binned) / np.sum(bkg_stack_summed) #important to do this after binning, since norm may be different than before (if var has -999's)
             for w_arr in bkg_w_stack:
                 rew_stack.append(w_arr*k_factor)
-            axes.hist(bkg_stack, bins=bins, label=bkg_proc_stack, weights=rew_stack, histtype='stepfilled', color=self.bkg_colours[0:len(bkg_proc_stack)], stacked=True, zorder=0)
+            axes.hist(bkg_stack, bins=bins, label=bkg_proc_stack_leg, weights=rew_stack, histtype='stepfilled', color=self.bkg_colours[0:len(bkg_proc_stack)], stacked=True, zorder=0)
 
             
             bkg_stack_summed *= k_factor
             sumw2_bkg, _  = np.histogram(np.concatenate(bkg_stack), bins=bins, weights=np.concatenate(rew_stack)**2)
         else: 
-            axes.hist(bkg_stack, bins=bins, label=bkg_proc_stack, weights=bkg_w_stack, histtype='stepfilled', color=self.bkg_colours[0:len(bkg_proc_stack)], stacked=True, zorder=0)
+            axes.hist(bkg_stack, bins=bins, label=bkg_proc_stack_leg, weights=bkg_w_stack, histtype='stepfilled', color=self.bkg_colours[0:len(bkg_proc_stack)], stacked=True, zorder=0)
             bkg_stack_summed, _ = np.histogram(np.concatenate(bkg_stack), bins=bins, weights=np.concatenate(bkg_w_stack))
             sumw2_bkg, _  = np.histogram(np.concatenate(bkg_stack), bins=bins, weights=np.concatenate(bkg_w_stack)**2)
 
@@ -168,7 +176,8 @@ class Plotter(object):
             axes.set_ylim(bottom=100, top=current_top*20)
         else: axes.set_ylim(bottom=0, top=current_top*1.35)
 
-        axes.legend(bbox_to_anchor=(0.9,0.97), ncol=2, prop={'size':10})
+        #axes.legend(bbox_to_anchor=(0.9,0.97), ncol=2, prop={'size':10})
+        axes.legend(bbox_to_anchor=(0.96,0.97), ncol=2, prop={'size':9})
         self.plot_cms_labels(axes)
            
         if ratio_plot:
@@ -185,37 +194,49 @@ class Plotter(object):
             ratio.set_xlabel('{}'.format(self.var_to_xstring[var]), ha='right', x=1, size=13)
             ratio.set_ylabel('Data/MC', size=13)
             #ratio.set_ylim(0, 2)
-            ratio.set_ylim(0.8, 1.2)
+            ratio.set_ylim(0.75, 1.25)
             ratio.grid(True, linestyle='dotted')
         else: axes.set_xlabel('{}'.format(self.var_to_xstring[var]), ha='right', x=1, size=13)
+
+        axes.set_xlim(left=self.var_to_xrange[var][0], right=self.var_to_xrange[var][1])
        
         Utils.check_dir('{}/plotting/plots/{}'.format(os.getcwd(), out_label))
         if extra_tag is not None: 
             fig.savefig('{0}/plotting/plots/{1}/{1}_{2}_cat{3}.pdf'.format(os.getcwd(), out_label, var, extra_tag))
+            print('saving: {0}/plotting/plots/{1}/{1}_{2}_cat{3}.pdf'.format(os.getcwd(), out_label, var, extra_tag))
         else:
             fig.savefig('{0}/plotting/plots/{1}/{1}_{2}.pdf'.format(os.getcwd(), out_label, var))
+            print('saving: {0}/plotting/plots/{1}/{1}_{2}.pdf'.format(os.getcwd(), out_label, var))
         plt.close()
 
+        if return_props: return fig,axes,ratio
+
     @classmethod 
-    def plot_cms_labels(self, axes, label='Work in progress', lumi='137',energy='(13 TeV)'):
+    def plot_cms_labels(self, axes, label='Work in progress', lumi='138',energy='(13 TeV)'):
         axes.text(0, 1.01, r'\textbf{CMS} %s'%label, ha='left', va='bottom', transform=axes.transAxes, size=14)
         if len(lumi)==0: axes.text(1, 1.01, r'%s'%(energy), ha='right', va='bottom', transform=axes.transAxes, size=14)
         else: axes.text(1, 1.01, r'%s fb\textsuperscript{-1} %s'%(lumi,energy), ha='right', va='bottom', transform=axes.transAxes, size=14)
 
-    def plot_roc(self, y_train, y_pred_train, train_weights, y_test, y_pred_test, test_weights, out_tag='MVA'):
+    def plot_roc(self, y_train, y_pred_train, train_weights, y_test, y_pred_test, test_weights, AUC, out_tag='MVA'):
         bkg_eff_train, sig_eff_train, _ = roc_curve(y_train, y_pred_train, sample_weight=train_weights)
         bkg_eff_test, sig_eff_test, _ = roc_curve(y_test, y_pred_test, sample_weight=test_weights)
 
         fig = plt.figure(1)
         axes = fig.gca()
-        axes.plot(bkg_eff_train, sig_eff_train, color='red', label='Train')
-        axes.plot(bkg_eff_test, sig_eff_test, color='blue', label='Test')
-        axes.set_xlabel('Background efficiency', ha='right', x=1, size=13)
+        axes.plot(bkg_eff_train, sig_eff_train, color='red', label='Train set')
+        axes.plot(bkg_eff_test, sig_eff_test, color='royalblue', label='Test set')
+        #axes.fill_between(bkg_eff_test, sig_eff_test, np.zeros_like(sig_eff_test), alpha=0.2)
+        #axes.fill_between(bkg_eff_train, sig_eff_train, np.zeros_like(sig_eff_train), alpha=0.7)
+
+        #axes.text(0.65, 0.3, r'AUC: %.3f'%(AUC), ha='left', va='bottom', transform=axes.transAxes, size=14, color='royalblue')
+        axes.plot(np.linspace(0,1,100),np.linspace(0,1,100), linestyle="--", color='black', zorder=0, label="Random classifier")
+        axes.set_xlabel('False positive rate', ha='right', x=1, size=13)
         axes.set_xlim((0,1))
-        axes.set_ylabel('Signal efficiency', ha='right', y=1, size=13)
+        axes.set_ylabel('True positive rate', ha='right', y=1, size=13)
         axes.set_ylim((0,1))
-        axes.legend(bbox_to_anchor=(0.97,0.97))
-        self.plot_cms_labels(axes)
+        #axes.legend(bbox_to_anchor=(0.97,0.97))
+        axes.legend(bbox_to_anchor=(0.97,0.28))
+        self.plot_cms_labels(axes, lumi='')
         axes.grid(True, 'major', linestyle='solid', color='grey', alpha=0.5)
         self.fig = fig
 
@@ -234,7 +255,8 @@ class Plotter(object):
             fig  = plt.figure(1)
             axes = fig.gca()
 
-        bins = np.linspace(0,1,41)
+        #bins = np.linspace(0,1,41)
+        bins = np.linspace(0,1,21)
 
         bkg_stack      = []
         bkg_w_stack    = []
@@ -258,7 +280,7 @@ class Plotter(object):
             bkg_proc_stack.append(bkg)
 
         #sig
-        axes.hist(sig_scores, bins=bins, label=self.sig_labels[0]+r' ($\mathrm{H}\rightarrow\mathrm{ee}$) '+self.num_to_str(self.sig_scaler), weights=sig_w_true*(self.sig_scaler), histtype='step', color=self.sig_colour)
+        axes.hist(sig_scores, bins=bins, label=self.proc_to_leg[self.sig_labels[0]]+r' ($\mathrm{H}\rightarrow\mathrm{ee}$) '+self.num_to_str(self.sig_scaler), weights=sig_w_true*(self.sig_scaler), histtype='step', color=self.sig_colour)
 
         #data - need to take test frac of data
         data_binned, bin_edges = np.histogram(data_pred_test, bins=bins)
@@ -267,16 +289,17 @@ class Plotter(object):
         data_down, data_up = self.poisson_interval(data_binned, data_binned)
         axes.errorbar( bin_centres, data_binned, yerr=[data_binned-data_down, data_up-data_binned], label='Data', fmt='o', ms=4, color='black', capsize=0, zorder=1)
 
+        bkg_proc_stack_leg = [self.proc_to_leg[proc] for proc in bkg_proc_stack]
         if norm_to_data: 
             rew_stack = []
             k_factor = np.sum(np.ones_like(data_pred_test))/np.sum(bkg_w_true)
             for w_arr in bkg_w_stack:
                 rew_stack.append(w_arr*k_factor)
-            bkg_mc_binned, _, _ = axes.hist(bkg_stack, bins=bins, label=bkg_proc_stack, weights=rew_stack, histtype='stepfilled', color=self.bkg_colours[0:len(bkg_proc_stack)], stacked=True, zorder=0)
+            bkg_mc_binned, _, _ = axes.hist(bkg_stack, bins=bins, label=bkg_proc_stack_leg, weights=rew_stack, histtype='stepfilled', color=self.bkg_colours[0:len(bkg_proc_stack)], stacked=True, zorder=0)
             bkg_stack_summed, _ = np.histogram(np.concatenate(bkg_stack), bins=bins, weights=np.concatenate(rew_stack))
             sumw2_bkg, _  = np.histogram(np.concatenate(bkg_stack), bins=bins, weights=np.concatenate(rew_stack)**2)
         else: 
-            axes.hist(bkg_stack, bins=bins, label=bkg_proc_stack, weights=bkg_w_stack, histtype='stepfilled', color=self.bkg_colours[0:len(bkg_proc_stack)], stacked=True, zorder=0)
+            axes.hist(bkg_stack, bins=bins, label=bkg_proc_stack_leg, weights=bkg_w_stack, histtype='stepfilled', color=self.bkg_colours[0:len(bkg_proc_stack)], stacked=True, zorder=0)
             bkg_stack_summed, _ = np.histogram(np.concatenate(bkg_stack), bins=bins, weights=np.concatenate(bkg_w_stack))
             sumw2_bkg, _  = np.histogram(np.concatenate(bkg_stack), bins=bins, weights=np.concatenate(bkg_w_stack)**2)
         #plot mc error 
@@ -297,15 +320,16 @@ class Plotter(object):
             ratio.set_xlabel('{} Score'.format(MVA), ha='right', x=1, size=13)
             ratio.set_ylim(0, 2)
             ratio.grid(True, linestyle='dotted')
+            ratio.set_ylabel('Data/MC', size=13)
         else: axes.set_xlabel('{} Score'.format(MVA), ha='right', x=1, size=13)
-        self.plot_cms_labels(axes, lumi='137')
+        self.plot_cms_labels(axes)
 
         current_bottom, current_top = axes.get_ylim()
         if log: 
             axes.set_yscale('log', nonposy='clip')
             axes.set_ylim(bottom=1, top=current_top*100)
         else: 
-            axes.set_ylim(bottom=0, top=current_top*1.45)
+            axes.set_ylim(bottom=0, top=current_top*1.51)
 
         #ggH
         #axes.axvline(0.890, ymax=0.7, color='black', linestyle='--')

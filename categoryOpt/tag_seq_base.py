@@ -270,6 +270,13 @@ class taggerBase(object):
                 self.tree_vars.append('{}Up01sigma'.format(syst_name))
                 self.tree_vars.append('{}Down01sigma'.format(syst_name))
 
+            #add QCD systs
+            qcd_indexes   = [0,1,3,5,7,8] 
+            qcd_var_names = ['qcd_scale_variation_'+str(v) for v in qcd_indexes]
+            for syst_name in qcd_var_names:
+                self.combined_df[syst_name] = self.combined_df['{}'.format(syst_name)] * self.combined_df['centralObjectWeight'].copy()
+                self.tree_vars.append('{}'.format(syst_name))
+
     def fill_trees(self, branch_names, year, print_yields=False):
 
         #have to save individual trees as root files (fn=bn), then hadd over single proc on the command line, to get one proc file with all tag trees
@@ -280,6 +287,7 @@ class taggerBase(object):
             lumi_map  = {'2016A':35.9, '2016B':35.9, '2017':41.5, '2018':59.7}
 
         for proc in self.true_procs:
+            if proc is 'Data': self.tree_vars.remove('centralObjectWeight')
             selected_df = self.combined_df[self.combined_df.proc==proc]
             if print_yields: print_str += '\n \n Process: {}'.format(proc)
             for bn in branch_names[proc]:

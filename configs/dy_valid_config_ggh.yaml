@@ -53,6 +53,7 @@ train_vars:
     ]
 
 vars_to_add:
+    'pt_weight':
 
 #preselection that will be applied to all samples.
 preselection: #NOTE: dont include upper bounds in this string! and keep the lower bounds loose

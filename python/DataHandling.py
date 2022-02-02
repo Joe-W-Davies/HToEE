@@ -71,28 +71,30 @@ class ROOTHelpers(object):
     :param read_systs: option to read in variables resulting from systematic variations e.g. JEC, JER, ...
     :type read_systs: bool
     """
-  
-    def __init__(self, out_tag, mc_dir, mc_fnames, data_dir, data_fnames, proc_to_tree_name, train_vars, vars_to_add, presel_str='', read_systs=False):
 
+    def __init__(self, out_tag, mc_dir, mc_fnames, data_dir, data_fnames, proc_to_tree_name, train_vars, vars_to_add, presel_str='', read_systs=False):
 
         self.years              = set()
         #self.lumi_map           = {'2016':35.9, '2017':41.5, '2018':59.7}
         self.lumi_map           = {'2016A':19.52, '2016B':16.81,'2017':41.5, '2018':59.7}
         self.lumi_scale         = True
-        self.XS_map             = {'ggH':48.58*5E-9, 'VBF':3.782*5E-9, 'ttH':0.5071*5E-9, 'ggH_Hgg':48.58*0.002, 'VBF_Hgg':3.782*0.002, 'DYMC': 6225.4, 'TT2L2Nu':86.61, 'TTSemiL':358.57, 'EWKZ':0.077, 'EWKZlowmass':1.014} #all in pb. also have BR for signals
-        #self.eff_acc            = {'2016':{'ggH':0.3929525, 'VBF':0.4024842, 'ttH':0.3834742, 'ggH_Hgg':-999, 'VBF_Hgg':-999, 'DYMC':0.0644015, 'TT2L2Nu':0.0184377, 'TTSemiL':0.0000877, 'EWKZ':0.1682972, 'EWKZlowmass':0.1023668}, #Pass17
-        #                           '2017':{'ggH':0.4084144, 'VBF':0.4198171, 'ttH':0.4044383, 'ggH_Hgg':-999, 'VBF_Hgg':-999, 'DYMC':0.0682661, 'TT2L2Nu':0.0192838, 'TTSemiL':0.0001087, 'EWKZ':0.1682972, 'EWKZlowmass':0.1023668},
-        #                           '2018':{'ggH':0.4120200, 'VBF':0.4225721, 'ttH':0.4067446, 'ggH_Hgg':-999, 'VBF_Hgg':-999, 'DYMC':0.0688228, 'TT2L2Nu':0.0194739, 'TTSemiL':0.0001059, 'EWKZ':0.1622357, 'EWKZlowmass':0.0991182}
-        #                          }     
-        self.eff_acc            = {'2016A':{'ggH':0.3826363, 'VBF':0.3927412, 'ttH':0.3734778, 'ggH_Hgg':-999, 'VBF_Hgg':-999, 'DYMC':-999, 'TT2L2Nu':-999, 'TTSemiL':-999, 'EWKZ':-999, 'EWKZlowmass':-999},
-                                   '2016B':{'ggH':0.4020990, 'VBF':0.4122175, 'ttH':0.3920465, 'ggH_Hgg':-999, 'VBF_Hgg':-999, 'DYMC':-999, 'TT2L2Nu':-999, 'TTSemiL':-999, 'EWKZ':-999, 'EWKZlowmass':-999},
-                                   '2017': {'ggH':0.3826363, 'VBF':0.4198171, 'ttH':0.4044383, 'ggH_Hgg':-999, 'VBF_Hgg':-999, 'DYMC':-999, 'TT2L2Nu':-999, 'TTSemiL':-999, 'EWKZ':-999, 'EWKZlowmass':-999},
-                                   '2018': {'ggH':0.4020990, 'VBF':0.4225721, 'ttH':0.4067446, 'ggH_Hgg':-999, 'VBF_Hgg':-999, 'DYMC':-999, 'TT2L2Nu':-999, 'TTSemiL':-999, 'EWKZ':-999, 'EWKZlowmass':-999}
-                                  }   #pass18.1 plus 18 for bkg mc plus 17 for data 
+        self.XS_map             = {'ggH':48.58*5.2E-9, 'VBF':3.782*5.2E-9, 'ttH':0.5071*5.2E-9,'VH':(1.373+0.7612)*5.2E-9,  'ggH_Hgg':48.58*0.002, 'VBF_Hgg':3.782*0.002, 'DYMC': 6225.4, 'TT2L2Nu':86.61, 'TTSemiL':358.57, 'EWKZ':0.077, 'EWKZlowmass':1.014} #all in pb. also have BR for signals
 
+        #self.eff_acc            = {'2016A':{'ggH':0.3826363, 'VBF':0.3927412, 'ttH':0.3734778, 'ggH_Hgg':-999, 'VBF_Hgg':-999, 'DYMC':0.0627496, 'TT2L2Nu':0.0179350, 'TTSemiL':0.0000861, 'EWKZ':0.1682972, 'EWKZlowmass':0.1023668}, #reuse 2017
+        #                           '2016B':{'ggH':0.4020990, 'VBF':0.4122175, 'ttH':0.3920465, 'ggH_Hgg':-999, 'VBF_Hgg':-999, 'DYMC':0.0658343, 'TT2L2Nu':0.0188459, 'TTSemiL':0.0000891, 'EWKZ':0.1682972, 'EWKZlowmass':0.1023668},
+        #                           '2017': {'ggH':0.4084606, 'VBF':0.4197707, 'ttH':0.4044383, 'ggH_Hgg':-999, 'VBF_Hgg':-999, 'DYMC':0.0682661, 'TT2L2Nu':0.0192838, 'TTSemiL':0.0001088, 'EWKZ':0.1682972, 'EWKZlowmass':0.1023668},
+        #                           '2018': {'ggH':0.4120200, 'VBF':0.4225721, 'ttH':0.4067446, 'ggH_Hgg':-999, 'VBF_Hgg':-999, 'DYMC':0.0688194, 'TT2L2Nu':0.0194743, 'TTSemiL':0.0001059, 'EWKZ':0.1622357, 'EWKZlowmass':0.0991182}
+        #                           } #pass 22 + pass23 in 2016 
+
+        self.eff_acc            = {'2016A':{'ggH':0.3826363, 'VBF':0.3925888, 'VH':-999, 'ttH':-999, 'DYMC':0.0627496, 'TT2L2Nu':0.0179350, 'TTSemiL':0.0000861, 'EWKZ':0.1682972, 'EWKZlowmass':0.1023668}, #use 2017 eff acc for EWZ
+                                   '2016B':{'ggH':0.4020990, 'VBF':0.4116441, 'VH':-999, 'ttH':-999, 'DYMC':0.0658343, 'TT2L2Nu':0.0188459, 'TTSemiL':0.0000891, 'EWKZ':0.1682972, 'EWKZlowmass':0.1023668},
+                                   '2017': {'ggH':0.4084606, 'VBF':0.4197707, 'VH':-999, 'ttH':-999, 'DYMC':0.0682661, 'TT2L2Nu':0.0192838, 'TTSemiL':0.0001088, 'EWKZ':0.1682972, 'EWKZlowmass':0.1023668},
+                                   '2018': {'ggH':0.4119919, 'VBF':0.4226484, 'VH':-999, 'ttH':-999, 'DYMC':0.0688194, 'TT2L2Nu':0.0194743, 'TTSemiL':0.0001059, 'EWKZ':0.1622357, 'EWKZlowmass':0.0991182}
+                                   } #CMS week + approval. Still have dodgy data samples in 2016 pre-VFP
         self.out_tag            = out_tag
         self.mc_dir             = mc_dir #FIXME: remove '\' using if_ends_with()
         self.data_dir           = data_dir
+        self.save_dfs           = True
 
         if vars_to_add is None: vars_to_add = {}
         self.vars_to_add        = vars_to_add
@@ -184,7 +186,78 @@ class ROOTHelpers(object):
         print 'Scaling year {} by : {}'.format(year,self.lumi_map[year]/35.9)
         self.mc_df_sig['weight'] = self.mc_df_sig['weight'] * sf
 
-    def load_mc(self, sample_obj, bkg=False, reload_samples=False):
+    def correct_energy_scale_2016(self, years='2016'):
+        """
+        Note: must have run the SF derivation for 2016 pre-VFP samples first
+        """
+
+
+        #with open('/vols/cms/jwd18/Hee/MLCategorisation/CMSSW_10_2_0/src/HToEE/MetaData/data_ptscale_sfs.pickle', 'wb') as handle:
+        #    pickle.dump(year_to_scale_factors, handle, protocol=pickle.HIGHEST_PROTOCOL)         
+
+        #df_bkg_year_i = self.mc_df_bkg.query('year=="{}"'.format(year))
+        #df_data_year_i = self.data_df.query('year=="{}"'.format(year))
+        #norm_factor = np.sum(df_data_year_i['weight']) / np.sum(df_bkg_year_i['weight'])
+        #df_bkg_year_i['weight'] *= norm_factor
+        #normed_year_dfs_bkg.append(df_bkg_year_i)
+
+        #self.mc_df_bkg = pd.concat( normed_year_dfs_bkg )
+
+    def encode_year(self):
+        """
+        Create a binary flag for each year as a column
+        """
+
+        for yr in self.lumi_map.keys():
+            self.mc_df_sig[yr] = self.mc_df_sig[self.mc_df_sig.year==yr].values
+            self.mc_df_bkg[yr] = self.mc_df_bkg[self.mc_df_sig.year==yr].values
+            self.data_df[yr]   = self.data_df[self.mc_df_sig.year==yr].values
+
+    def encode_n_jets(self):
+        """
+        Add N jets as column in df
+        """
+
+        def add_n_jets(row):
+            if row['leadJetPt'] < 0: return 0
+            elif row['subleadJetPt'] < 0: return 1
+            elif row['subsubleadJetPt'] < 0: return 2
+            else: return 3
+
+        self.mc_df_sig['n_jets'] = self.mc_df_sig.apply(add_n_jets, axis=1)
+        self.mc_df_bkg['n_jets'] = self.mc_df_bkg.apply(add_n_jets, axis=1)
+        #self.data_df['n_jets']   = self.data_df.apply(add_n_jets, axis=1)
+
+    def add_LabEleDieleDTheta(self):
+        """
+        Add angle between (the e- in rest frame of ee system) and (direction of ee system in lab frame) as requested by ARC
+        """
+
+        import ROOT
+        from ROOT import TLorentzVector
+
+        def calc_dAngle(row):
+            #get position vector of dielectron in lab frame in terms of 3 vector
+            dielectron_lab_p4 = TLorentzVector()
+            dielectron_lab_p4.SetPtEtaPhiM(row['dielectronPt'], row['dielectronEta'], row['dielectronPhi'], row['dielectronMass'])
+
+            #get position vector of negative e in rest frame of ee system
+            e_minus_lab_p4 = TLorentzVector()
+            if row['leadElectronCharge'] < 0:
+                e_minus_lab_p4.SetPtEtaPhiM(row['leadElectronPt'], row['leadElectronEta'], row['leadElectronPhi'], row['leadElectronMass'])
+            else:
+                e_minus_lab_p4.SetPtEtaPhiM(row['subleadElectronPt'], row['subleadElectronEta'], row['subleadElectronPhi'], row['subleadElectronMass'])
+            dielectron_lab_p3_booster = dielectron_lab_p4.BoostVector()
+            e_minus_lab_p4.Boost(-dielectron_lab_p3_booster) #NOTE: now its the e minus in the dielectron COM frame!
+            
+            #return the angle between the two vectors computed above
+            return dielectron_lab_p4.Angle(e_minus_lab_p4.Vect())
+
+        self.mc_df_sig['eMinusDielectronDThetaLab'] = self.mc_df_sig.apply(calc_dAngle, axis=1)
+        self.mc_df_bkg['eMinusDielectronDThetaLab'] = self.mc_df_bkg.apply(calc_dAngle, axis=1)
+        self.data_df['eMinusDielectronDThetaLab']   = self.data_df.apply(calc_dAngle, axis=1)
+
+    def load_mc(self, sample_obj, bkg=False, reload_samples=False, read_QCD_arrays=False):
         """
         Try to load mc dataframe. If it doesn't exist, read in the root file.
         This should be used once per year, if reading in multiple years.
@@ -210,7 +283,8 @@ class ROOTHelpers(object):
                                                                sample_obj.file_name,
                                                                sample_obj.tree_name,
                                                                'sig', sample_obj.year,
-                                                               sample_obj.vars_to_read
+                                                               sample_obj.vars_to_read,
+                                                               read_QCD_arrays=read_QCD_arrays
                                                               )
                                              )
             else: self.mc_df_bkg.append( self.root_to_df(self.mc_dir,
@@ -218,7 +292,8 @@ class ROOTHelpers(object):
                                                          sample_obj.file_name, 
                                                          sample_obj.tree_name,
                                                          'bkg', sample_obj.year,
-                                                         sample_obj.vars_to_read
+                                                         sample_obj.vars_to_read,
+                                                         read_QCD_arrays=read_QCD_arrays
                                                         )
                                        )
 
@@ -260,17 +335,14 @@ class ROOTHelpers(object):
         df: pandas dataframe that was read in.
         """
 
-        #print ('loading {}{}_{}_df_{}.pkl'.format(df_dir, proc, self.out_tag, year))
-        #df = pd.read_hdf('{}{}_{}_df_{}.h5'.format(df_dir, proc, self.out_tag, year))
-        #df = pd.read_pickle('{}{}_{}_df_{}.pkl'.format(df_dir, proc, self.out_tag, year))
         df = pd.read_csv('{}{}_{}_df_{}.csv'.format(df_dir, proc, self.out_tag, year))
-        missing_vars = [x for x in self.train_vars if x not in df.columns]
-        if len(missing_vars)!=0: raise IOError('Missing variables in dataframe: {}. Reload with option -r and try again'.format(missing_vars))
+        missing_vars = [x for x in self.train_vars if x not in list(df.columns)+list(self.vars_to_add.keys())]
+        if len(missing_vars)!=0: raise IOError('Missing variables in dataframe: {}. Reload with option -r and try again'.format(missing_vars)) #will actually catch this error but still exits later on
         else: print('Sucessfully loaded DataFrame: {}{}_{}_df_{}.csv'.format(df_dir, proc, self.out_tag, year))
 
         return df    
 
-    def root_to_df(self, file_dir, proc_tag, file_name, tree_name, flag, year, vars_to_read):
+    def root_to_df(self, file_dir, proc_tag, file_name, tree_name, flag, year, vars_to_read, read_QCD_arrays=False):
         """
         Load a single root file for signal, background or data, for a given year. Apply any preselection.
         If reading in simulated samples, apply lumi scaling and read in gen-level variables too
@@ -305,7 +377,15 @@ class ROOTHelpers(object):
             #cannot cut on sim now as need to run MC_norm and need sumGenW before selection!
             df = df_tree.pandas.df(vars_to_read+gen_vars)
             #NOTE: dont apply cuts yet as need to do MC norm!
-
+            if read_QCD_arrays: #kinf of janky but arrays are Awkward and have no pandas compatibility
+                df_qcd_cols = []
+                qcd_indexes = [0,1,3,5,7,8]
+                for i in qcd_indexes: #2nd and 6th elements can be ignored as unphysical variations. 4 is nominal (=1)
+                    df_qcd_cols.append( pd.DataFrame([l[i] for l in df_tree.array("LHEScaleWeight")]) )
+                df_qcd = pd.concat(df_qcd_cols, axis=1, ignore_index=True)
+                original_df_cols = df.columns.tolist()
+                df = pd.concat([df,df_qcd], axis=1, ignore_index=True)
+                df.columns = original_df_cols + ['qcd_scale_variation_'+str(v) for v in qcd_indexes]
 
         if len(self.cut_string)>0:
             if flag != 'Data':
@@ -337,11 +417,10 @@ class ROOTHelpers(object):
 
         print('Number of events in final dataframe: {}'.format(np.sum(df['weight'].values)))
         #save everything
-        Utils.check_dir(file_dir+'DataFrames/') 
-        df.to_csv('{}/{}_{}_df_{}.csv'.format(file_dir+'DataFrames', proc_tag, self.out_tag, year))
-        print('Saved dataframe: {}/{}_{}_df_{}.csv'.format(file_dir+'DataFrames', proc_tag, self.out_tag, year))
-        #df.to_pickle('{}/{}_{}_df_{}.pkl'.format(file_dir+'DataFrames', proc_tag, self.out_tag, year))
-        #df.to_hdf('{}/{}_{}_df_{}.h5'.format(file_dir+'DataFrames', proc_tag, self.out_tag, year), 'df', mode='w', format='t')
+        if self.save_dfs:
+            Utils.check_dir(file_dir+'DataFrames/') 
+            df.to_csv('{}/{}_{}_df_{}.csv'.format(file_dir+'DataFrames', proc_tag, self.out_tag, year))
+            print('Saved dataframe: {}/{}_{}_df_{}.csv'.format(file_dir+'DataFrames', proc_tag, self.out_tag, year))
 
         return df
 
@@ -417,7 +496,7 @@ class ROOTHelpers(object):
         if len(self.data_df) == 1: self.data_df = self.data_df[0] 
         elif len(self.data_df) == 0 : pass
         else: self.data_df = pd.concat(self.data_df)
-   
+
     def apply_pt_rew(self, bkg_proc, presel, norm=True):
         """
         Derive a reweighting for a single bkg process in a m(ee) control region around the Z-peak, in bins on pT(ee),
@@ -456,6 +535,9 @@ class ROOTHelpers(object):
             bkg_pt_binned, _ = np.histogram(bkg_df['dielectronPt'], bins=pt_bins, weights=bkg_df['weight'])
             data_pt_binned, bin_edges = np.histogram(data_df['dielectronPt'], bins=pt_bins)
             year_to_scale_factors[year] = data_pt_binned/bkg_pt_binned
+
+        with open('/vols/cms/jwd18/Hee/MLCategorisation/CMSSW_10_2_0/src/HToEE/studies/ARC/SFs_per_year/sfs.pickle', 'wb') as handle:
+            pickle.dump(year_to_scale_factors, handle, protocol=pickle.HIGHEST_PROTOCOL)         
 
         #put samples into SR phase space. 
         self.apply_more_cuts(presel)
@@ -598,8 +680,6 @@ class ROOTHelpers(object):
         else: self.mc_df_bkg['weight'] = self.mc_df_bkg.apply(self.pt_njet_reweight_helper, axis=1, args=[bkg_proc, year, bin_edges, n_jets_to_sfs_map, True, None])
         self.save_modified_dfs(year)
          
-
-
     def save_modified_dfs(self, year, ignore_sig=False, ignore_bkg=False, ignore_data=False):
         """
         Save dataframes again. Useful if modifications were made since reading in and saving e.g. pT reweighting or applying more selection
@@ -615,24 +695,17 @@ class ROOTHelpers(object):
         if not ignore_sig:
             for sig_proc in self.sig_procs:
                 sig_df = self.mc_df_sig[np.logical_and(self.mc_df_sig.proc==sig_proc, self.mc_df_sig.year==year)]
-                #sig_df.to_hdf('{}/{}_{}_df_{}.h5'.format(self.mc_dir+'DataFrames', sig_proc, self.out_tag, year), 'df', mode='w', format='t')
-                #sig_df.to_pickle('{}/{}_{}_df_{}.pkl'.format(self.mc_dir+'DataFrames', sig_proc, self.out_tag, year))
                 sig_df.to_csv('{}/{}_{}_df_{}.csv'.format(self.mc_dir+'DataFrames', sig_proc, self.out_tag, year))
                 print('saved dataframe: {}/{}_{}_df_{}.csv'.format(self.mc_dir+'DataFrames', sig_proc, self.out_tag, year))
 
         if not ignore_bkg:
             for bkg_proc in self.bkg_procs:
                 bkg_df = self.mc_df_bkg[np.logical_and(self.mc_df_bkg.proc==bkg_proc,self.mc_df_bkg.year==year)]
-                #bkg_df.to_hdf('{}/{}_{}_df_{}.h5'.format(self.mc_dir+'DataFrames', bkg_proc, self.out_tag, year), 'df', mode='w', format='t')
-                #bkg_df.to_pickle('{}/{}_{}_df_{}.pkl'.format(self.mc_dir+'DataFrames', bkg_proc, self.out_tag, year))
                 bkg_df.to_csv('{}/{}_{}_df_{}.csv'.format(self.mc_dir+'DataFrames', bkg_proc, self.out_tag, year))
                 print('saved dataframe: {}/{}_{}_df_{}.csv'.format(self.mc_dir+'DataFrames', bkg_proc, self.out_tag, year))
 
         if not ignore_data:
             data_df = self.data_df[self.data_df.year==str(year)]
-            #data_df.to_hdf('{}/{}_{}_df_{}.h5'.format(self.data_dir+'DataFrames', 'Data', self.out_tag, year), 'df', mode='w', format='t')
-            #data_df.to_pickle('{}/{}_{}_df_{}.pkl'.format(self.data_dir+'DataFrames', 'Data', self.out_tag, year))
             data_df.to_csv('{}/{}_{}_df_{}.csv'.format(self.data_dir+'DataFrames', 'Data', self.out_tag, year))
             print('saved dataframe: {}/{}_{}_df_{}.csv'.format(self.data_dir+'DataFrames', 'Data', self.out_tag, year))
-
 

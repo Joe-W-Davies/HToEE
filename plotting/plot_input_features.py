@@ -29,8 +29,6 @@ def main(options):
         sig_colour        = 'red'
  
                                            #Data handling stuff#
-        sys.exit(1)
-
         #load the mc dataframe for all years
         if options.pt_reweight: 
             cr_selection = config['reweight_cr']
@@ -49,12 +47,15 @@ def main(options):
         if options.pt_reweight and options.reload_samples: 
             root_obj.apply_pt_rew('DYMC', presel)
 
+        #root_obj.add_LabEleDieleDTheta()
                                             #Plotter stuff#
  
         #set up X, w and y, train-test 
-        plotter = Plotter(root_obj, train_vars, sig_col=sig_colour, norm_to_data=True)
+        #plotter = Plotter(root_obj, train_vars, sig_col=sig_colour, norm_to_data=True)
+        plotter = Plotter(root_obj, train_vars, sig_col=sig_colour, norm_to_data=False)
         for var in train_vars:
-            plotter.plot_input(var, options.n_bins, output_tag, options.ratio_plot, norm_to_data=True)
+        #for var in ['dielectronPt']:
+            plotter.plot_input(var, options.n_bins, output_tag, options.ratio_plot, norm_to_data=False)
 
 if __name__ == "__main__":
 
@@ -63,7 +64,7 @@ if __name__ == "__main__":
     required_args.add_argument('-c','--config', action='store', required=True)
     opt_args = parser.add_argument_group('Optional Arguements')
     opt_args.add_argument('-r','--reload_samples', action='store_true', default=False)
-    opt_args.add_argument('-b','--n_bins',  default=26, type=int)
+    opt_args.add_argument('-b','--n_bins',  default=34, type=int)
     opt_args.add_argument('-P','--pt_reweight',  action='store_true', default=False)
     opt_args.add_argument('-R','--ratio_plot',  action='store_true', default=False)
     #opt_args.add_argument('-D','--no_data',  action='store_true', default=False)

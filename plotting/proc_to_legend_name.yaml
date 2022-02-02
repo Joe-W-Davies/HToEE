@@ -1,0 +1,8 @@
+proc_to_leg_name:
+    'DYMC'   : 'DY ($Z\rightarrow \mathrm{ee}$)'
+    'VBF'    : 'VBF'
+    'ggH'    : 'ggH'
+    "Data"   : 'Data'
+    "TT2L2Nu": '$t\bar{t}\rightarrow 2\ell2\nu$'
+    "TTSemiL": '$t\bar{t}\rightarrow$ semi-leptonic'
+    "EWKZ"   : 'EW $Z$'

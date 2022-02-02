@@ -24,11 +24,11 @@ def annotate_and_save(axes, plotter, var):
     axes.set_ylim(bottom=0, top=current_top*1.3)
     #axes.legend(bbox_to_anchor=(0.97,0.97), ncol=2)
     axes.legend(loc='upper center', bbox_to_anchor=(0.5,0.97), ncol=2)
-    plotter.plot_cms_labels(axes, lumi='137')
+    plotter.plot_cms_labels(axes, lumi='')
 
     var_name_safe = var.replace('_',' ')
-    #axes.set_xlim(left=plotter.var_to_xrange[var][0], right=plotter.var_to_xrange[var][1])
-    axes.set_xlabel('{}'.format(var_name_safe), ha='right', x=1, size=13)
+    axes.set_xlim(left=plotter.var_to_xrange[var][0], right=plotter.var_to_xrange[var][1])
+    axes.set_xlabel(plotter.var_to_xstring[var], ha='right', x=1, size=13)
 
 def main(options):
 
@@ -49,7 +49,8 @@ def main(options):
         presel            = config['preselection']
 
         proc_to_tree_name = config['proc_to_tree_name']
-        colours           = ['#d7191c', '#fdae61', '#f2f229', '#abdda4', '#2b83ba']
+        colours           = ['#d7191c', '#fdae61', '#f2f229', '#abdda4', '#2b83ba'] #rainbow
+        #colours           = ['#FF0101','#CC012D','#86017A','#5B01B9','#5601FF'] #blue->red
 
                                            #Data handling stuff#
 
@@ -64,14 +65,13 @@ def main(options):
             root_obj.load_mc(sig_obj, reload_samples=options.reload_samples)
         for bkg_obj in root_obj.bkg_objects:
             root_obj.load_mc(bkg_obj, bkg=True, reload_samples=options.reload_samples)
-        #for data_obj in root_obj.data_objects:
-        #    root_obj.load_data(data_obj, reload_samples=options.reload_samples)
         root_obj.concat()
 
         if options.pt_reweight and options.reload_samples: 
             for year in root_obj.years:
                 root_obj.pt_reweight('DYMC', year, presel)
 
+        root_obj.encode_n_jets()
                                             #Plotter stuff#
 
         #add model predictions to sig df
@@ -89,7 +89,9 @@ def main(options):
         Utils.check_dir('{}/plotting/plots/{}_sig_bkg_evo'.format(os.getcwd(), output_tag))
         i_hist = 0
 
-        for var in train_vars+['dielectronMass']:
+        #for var in train_vars+['dielectronMass']:
+        #for var in ['dielectronPt']:
+        for var in ['dielectronMass']:
             fig  = plt.figure(1)
             axes = fig.gca()
             var_bins = np.linspace(plotter.var_to_xrange[var][0], plotter.var_to_xrange[var][1], options.n_bins)
@@ -106,6 +108,7 @@ def main(options):
 
         #plot background (check mass is not being sculpted)
         for var in ['dielectronMass']:
+        #for var in ['n_jets']:
             fig  = plt.figure(1)
             axes = fig.gca()
             var_bins = np.linspace(plotter.var_to_xrange[var][0], plotter.var_to_xrange[var][1], options.n_bins)
@@ -118,6 +121,7 @@ def main(options):
 
             annotate_and_save(axes, plotter, var)
             fig.savefig('{0}/plotting/plots/{1}_sig_bkg_evo/{1}_{2}_bkg.pdf'.format(os.getcwd(), output_tag, var))
+            print('saving: {0}/plotting/plots/{1}_sig_bkg_evo/{1}_{2}_bkg.pdf'.format(os.getcwd(), output_tag, var))
             plt.close()
 
 
@@ -129,10 +133,10 @@ if __name__ == "__main__":
     required_args = parser.add_argument_group('Required Arguments')
     required_args.add_argument('-c','--config', action='store', required=True)
     required_args.add_argument('-m','--model', action='store', required=True)
-    required_args.add_argument('-B','--boundaries', nargs='+', required=True, default=[0.3,0.5,0.7,1.0], type=float)
+    required_args.add_argument('-B','--boundaries', nargs='+', required=True, default=[0.0,0.3,0.5,0.7,1.0], type=float)
     opt_args = parser.add_argument_group('Optional Arguements')
     opt_args.add_argument('-r','--reload_samples', action='store_true', default=False)
-    opt_args.add_argument('-b','--n_bins',  default=26, type=int)
+    opt_args.add_argument('-b','--n_bins',  default=34, type=int)
     opt_args.add_argument('-P','--pt_reweight',  action='store_true', default=False)
     options=parser.parse_args()
     main(options)

@@ -43,10 +43,6 @@ def main(options):
         print 'loading classifier: {}'.format(options.model)
         clf = pickle.load(open("{}".format(options.model), "rb"))
 
-        #apply cut-based selection if not optimising BDT score (pred probs still evaluated for compatability w exisiting constructor). 
-        if len(options.cut_based_str)>0:
-            root_obj.apply_more_cuts(options.cut_based_str)
-
         sig_weights   = root_obj.mc_df_sig['weight'].values
         sig_m_ee      = root_obj.mc_df_sig['dielectronMass'].values
         pred_prob_sig = clf.predict_proba(root_obj.mc_df_sig[train_vars].values)
@@ -64,26 +60,21 @@ def main(options):
         #set up optimiser ranges and no. categories to test if non-cut based
         ranges    = [ [0.1,1.], [0,1.] ]
         names     = ['{}_score'.format(output_tag), 'Third_class_score'] 
+        #names     = ['{}_score'.format(output_tag), 'bkg_class'] 
         print_str = ''
-        cats = [1,2,3]
+        cats = [1]
         AMS  = []
 
-        #just to use class methods here
-        if len(options.cut_based_str)>0:
-            optimiser = CatOptim(sig_weights, sig_m_ee, [pred_prob_sig[:,2],pred_prob_sig[:,1]], bkg_weights, bkg_m_ee, [pred_prob_bkg[:,2],pred_prob_bkg[:,1]], 0, ranges, names)
-            AMS = optimiser.cutBasedAMS()
-            print 'String for cut based optimimastion: {}'.format(options.cut_based_str)
-            print 'Cut-based optimimsation gives AMS = {:1.8f}'.format(AMS)
-
-        else:
-            for n_cats in cats:
-                optimiser = CatOptim(sig_weights, sig_m_ee, [pred_prob_sig[:,2],pred_prob_sig[:,1]], bkg_weights, bkg_m_ee, [pred_prob_bkg[:,2],pred_prob_bkg[:,1]], n_cats, ranges, names)
-                #optimiser.setOpposite('Third_class_score')
-                optimiser.optimise(1, options.n_iters) #set lumi to 1 as already scaled when loading in
-                print_str += 'Results for {} categories : \n'.format(n_cats)
-                print_str += optimiser.getPrintableResult()
-                AMS.append(optimiser.bests.totSignif)
-            print '\n {}'.format(print_str)
+        for n_cats in cats:
+            optimiser = CatOptim(sig_weights, sig_m_ee, [pred_prob_sig[:,2],pred_prob_sig[:,1]], bkg_weights, bkg_m_ee, [pred_prob_bkg[:,2],pred_prob_bkg[:,1]], n_cats, ranges, names)
+            #optimiser = CatOptim(sig_weights, sig_m_ee, [pred_prob_sig[:,2],pred_prob_sig[:,0]], bkg_weights, bkg_m_ee, [pred_prob_bkg[:,2],pred_prob_bkg[:,0]], n_cats, ranges, names)
+            #optimiser.setOpposite('Third_class_score')
+            #optimiser.setOpposite('bkg_class') #FIXME: trying this for bkg instead of EWKZ
+            optimiser.optimise(1, options.n_iters) #set lumi to 1 as already scaled when loading in
+            print_str += 'Results for {} categories : \n'.format(n_cats)
+            print_str += optimiser.getPrintableResult()
+            AMS.append(optimiser.bests.totSignif)
+        print '\n {}'.format(print_str)
 
 
         #make nCat vs AMS plots
@@ -100,6 +91,5 @@ if __name__ == "__main__":
     opt_args.add_argument('-r','--reload_samples', action='store_true', default=False)
     opt_args.add_argument('-i','--n_iters', action='store', default=5000, type=int)
     opt_args.add_argument('-d','--data_as_bkg', action='store_true', default=False)
-    opt_args.add_argument('-k','--cut_based_str', action='store',type=str, default='')
     options=parser.parse_args()
     main(options)

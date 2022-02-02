@@ -48,8 +48,12 @@ def main(options):
         # is applied here and all df's are resaved for smaller mem
         if options.pt_reweight and options.reload_samples:  #FIXME what about reading files in first time, wanting to pT rew, but not including options.reload samples? It wont reweight and save the reweighted df's
             root_obj.apply_pt_rew('DYMC', presel)
-            #root_obj.pt_njet_reweight('DYMC', year, presel)
 
+
+        #FIXME: messing around with new variables and other ARC review comments 
+        #root_obj.encode_year()
+        #root_obj.add_LabEleDieleDTheta()
+        #root_obj.encode_n_jets()
         
                                                 #BDT stuff#
 
@@ -97,12 +101,12 @@ def main(options):
 
         #else just train BDT with default HPs
         else:
-            bdt_hee.train_classifier(root_obj.mc_dir, save=True, model_name=output_tag+'_clf')
-            #bdt_hee.train_classifier(root_obj.mc_dir, save=False, model_name=output_tag+'_clf')
-            bdt_hee.compute_roc()
-            bdt_hee.plot_roc(output_tag)
-            #bdt_hee.plot_output_score(output_tag, ratio_plot=True, norm_to_data=(not options.pt_reweight), log=False)
+            #bdt_hee.train_classifier(root_obj.mc_dir, save=True, model_name=output_tag+'_clf')
+            bdt_hee.train_classifier(root_obj.mc_dir, save=False, model_name=output_tag+'_clf')
+            AUC = bdt_hee.compute_roc()
+            bdt_hee.plot_roc(output_tag, AUC=AUC)
             bdt_hee.plot_output_score(output_tag, ratio_plot=True, norm_to_data=(not options.pt_reweight), log=True)
+            #bdt_hee.plot_feature_importance(imp_type='gain', out_tag=output_tag)
 
 if __name__ == "__main__":
 

@@ -31,23 +31,12 @@ var_to_xstring:
     'leadJetDieleDEta':        '$\Delta\eta(j_1,ee)$'
     'subleadJetDieleDPhi':     '$\Delta\phi(j_2,ee)$'
     'subleadJetDieleDEta':     '$\Delta\eta(j_2,ee)$'
-    #'subsubleadJetCentrality': [0.,1,false]
-    #'nSoftJets':               [0.,6,false]
-    #'metSumET':                [0,4000]
-    #'metPt':                   [0,400]
-    #'metPhi':                  [-3.,3]
-    #'leadJetBTagScore':        [0,1]
-    #'subleadJetBTagScore':     [0,1]
-    #'subsubleadJetBTagScore':  [0,1]
 
-    'dielectronMass':          '$m_{ee}$'
-    #'dielectronMass':          [80,100,false]
-    #'leadJetPUJID':            [0,7,false]
-    #'subleadJetPUJID':         [0,7,false]
-    #'subsubleadJetPUJID':      [0,7,false]
-    #'leadJetID':               [0,7,false]
-    #'subleadJetID':            [0,7,false]
-    #'subsubleadJetID':         [0,7,false]
+    'eMinusDielectronDThetaLab': 'Boson spin-dependent angle'
+    'n_jets':                  'Jet multiplicity'
     
-    'VBF_mva':                  'VBF BDT'
-    'ggH_mva':                  'ggH BDT'
+    'dielectronMass':          '$m_{ee}$'
+    'leadElectronPt':          'Lead electron $p_{T}$'
+    'subleadElectronPt':       'Sublead electron $p_{T}$'
+    'VBF_mva':                 'VBF BDT'
+    'ggH_mva':                 'ggH BDT'

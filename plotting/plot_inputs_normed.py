@@ -58,20 +58,13 @@ def main(options):
             for year in root_obj.years:
                 root_obj.pt_reweight('DYMC', year, presel)
 
+        #root_obj.add_LabEleDieleDTheta()
+        #root_obj.encode_n_jets()
                                             #Plotter stuff#
-        with open('plotting/var_to_xrange.yaml', 'r') as plot_config_file:
-            plot_config        = yaml.load(plot_config_file)
-            var_to_xrange      = plot_config['var_to_xrange']
 
-        #get x string replacements from yaml config
-        with open('plotting/var_to_xstring.yaml', 'r') as plot_config_file:
-            plot_string_cfg    = yaml.load(plot_config_file)
-            var_to_xstring     = plot_string_cfg['var_to_xstring']
- 
         #set up X, w and y, train-test 
         plotter = Plotter(root_obj, train_vars, sig_col=sig_colour, norm_to_data=True)
         for var in train_vars:
-        #for var in ['dielectronCosPhi']:
 
             fig  = plt.figure(1)
             axes = fig.gca()
@@ -81,7 +74,7 @@ def main(options):
             var_bkg     = root_obj.mc_df_bkg[var].values
             bkg_weights = root_obj.mc_df_bkg['weight'].values
 
-            bins = np.linspace(var_to_xrange[var][0], var_to_xrange[var][1], 56)
+            bins = np.linspace(plotter.var_to_xrange[var][0], plotter.var_to_xrange[var][1], options.n_bins)
 
             #add sig mc
             axes.hist(var_sig, bins=bins, label=plotter.sig_labels[0]+r' ($\mathrm{H}\rightarrow\mathrm{ee}$)', weights=sig_weights, histtype='stepfilled', color='red', zorder=10, alpha=0.4, normed=True)
@@ -89,12 +82,17 @@ def main(options):
 
             axes.set_ylabel('Arbitrary Units', ha='right', y=1, size=13)
             current_bottom, current_top = axes.get_ylim()
-            axes.set_ylim(bottom=0, top=1.2*current_top)
-            axes.set_xlim(left=var_to_xrange[var][0], right=var_to_xrange[var][1])
+            if not plotter.var_to_xrange[var][2]: axes.set_ylim(bottom=0, top=1.2*current_top)
+            else:
+                axes.set_yscale('log', nonposy='clip')
+                axes.set_ylim(bottom=0.01, top=5*current_top)
+
+            axes.set_xlim(left=plotter.var_to_xrange[var][0], right=plotter.var_to_xrange[var][1])
+
             axes.legend(bbox_to_anchor=(0.97,0.97), ncol=1)
             plotter.plot_cms_labels(axes, lumi='')
                
-            axes.set_xlabel('{}'.format(var_to_xstring[var]), ha='right', x=1, size=13)
+            axes.set_xlabel('{}'.format(plotter.var_to_xstring[var]), ha='right', x=1, size=13)
 
             Utils.check_dir('{}/plotting/plots/{}/normed/'.format(os.getcwd(), output_tag))
             fig.savefig('{0}/plotting/plots/{1}/normed/{1}_{2}_normalised.pdf'.format(os.getcwd(), output_tag, var))
@@ -109,7 +107,7 @@ if __name__ == "__main__":
     required_args.add_argument('-c','--config', action='store', required=True)
     opt_args = parser.add_argument_group('Optional Arguements')
     opt_args.add_argument('-r','--reload_samples', action='store_true', default=False)
-    opt_args.add_argument('-b','--n_bins',  default=26, type=int)
+    opt_args.add_argument('-b','--n_bins',  default=34, type=int)
     opt_args.add_argument('-P','--pt_reweight',  action='store_true', default=False)
     options=parser.parse_args()
     main(options)

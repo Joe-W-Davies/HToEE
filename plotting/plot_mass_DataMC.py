@@ -2,6 +2,7 @@ import argparse
 import numpy as np
 import yaml
 import pickle
+import os
 
 from DataHandling import ROOTHelpers
 from PlottingUtils import Plotter
@@ -26,8 +27,8 @@ def main(options):
 
         proc_to_tree_name = config['proc_to_tree_name']
 
-        #sig_colour        = 'forestgreen'
-        sig_colour        = 'red'
+        sig_colour        = 'forestgreen'
+        #sig_colour        = 'red'
  
                                            #Data handling stuff#
 
@@ -68,11 +69,18 @@ def main(options):
                                             #Plotter stuff#
 
         plotter = Plotter(root_obj, train_vars, sig_col=sig_colour, norm_to_data=True)
+        plotter.sig_scaler = 10**6
         cat_counter = 0
         for b in boundaries:
             if cat_counter==0: extra_cuts = options.mva_proc+'_mva >' + str(boundaries['tag_0'])
             else: extra_cuts = (options.mva_proc+'_mva <' + str(boundaries['tag_'+str(cat_counter-1)])) + ' and ' + (options.mva_proc+'_mva >' + str(boundaries['tag_'+str(cat_counter)]))
-            plotter.plot_input(options.mass_var_name, options.n_bins, output_tag, options.ratio_plot, norm_to_data=True, extra_cuts=extra_cuts, extra_tag=cat_counter, blind=True)
+            #plotter.plot_input(options.mass_var_name, options.n_bins, output_tag, options.ratio_plot, norm_to_data=True, extra_cuts=extra_cuts, extra_tag=cat_counter, blind=True)
+            fig,axes,ratio = plotter.plot_input(options.mass_var_name, options.n_bins, output_tag, options.ratio_plot, norm_to_data=True, extra_cuts=extra_cuts, extra_tag=cat_counter, blind=False, return_props=True)
+            #axes.text(0.04, 0.93, '{} \n category {} '.format(options.mva_proc,cat_counter), ha='left', va='top', transform=axes.transAxes, size=10)
+            axes.text(0.1, 0.895, '{} \n category {} '.format(options.mva_proc,cat_counter), ha='center', va='center', transform=axes.transAxes, size=10)
+            #axes.set_ylim(0, 140)
+            ratio.set_ylim(0, 2)
+            fig.savefig('{0}/plotting/plots/{1}/{1}_{2}_cat{3}.pdf'.format(os.getcwd(), output_tag, options.mass_var_name, cat_counter))
             cat_counter += 1
 
 

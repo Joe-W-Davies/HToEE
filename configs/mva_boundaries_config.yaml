@@ -2,12 +2,22 @@ models:
     VBF: 'VBF_BDT_clf.pickle.dat'
     ggH: 'ggH_BDT_pt_reweighted_clf.pickle.dat'
 
-boundaries:
+#boundaries: #pass24
+#    VBF: 
+#        tag_0: 0.922
+#        tag_1: 0.783
+#    ggH:
+#        tag_0: 0.856
+#        tag_1: 0.680
+#        tag_2: 0.481
+#        tag_3: 0.229
+
+boundaries: #pass25
     VBF: 
-        tag_0: 0.911
-        tag_1: 0.719
+        tag_0: 0.921
+        tag_1: 0.742
     ggH:
-        tag_0: 0.849
-        tag_1: 0.693
-        tag_2: 0.510
-        tag_3: 0.227
+        tag_0: 0.845
+        tag_1: 0.668
+        tag_2: 0.464
+        tag_3: 0.250

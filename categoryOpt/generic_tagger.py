@@ -55,7 +55,7 @@ def main(options):
         root_obj = ROOTHelpers(output_tag, mc_dir, mc_fnames, data_dir, data_fnames, proc_to_tree_name, all_train_vars, vars_to_add, loosest_selection, read_systs=(read_syst or options.dump_weight_systs)) 
         root_obj.no_lumi_scale()
         for sig_obj in root_obj.sig_objects:
-            root_obj.load_mc(sig_obj, reload_samples=options.reload_samples)
+            root_obj.load_mc(sig_obj, reload_samples=options.reload_samples, read_QCD_arrays=True)
         #if not read_syst:
         if not options.data_as_bkg:
             for bkg_obj in root_obj.bkg_objects:
@@ -83,7 +83,7 @@ def main(options):
     #specify sequence of tags and preselection targetting each
 
     tag_sequence      = ['VBF','ggH'] #categories targetted
-    true_procs        = ['VBF','ggH', 'ttH'] #procs to run through cats
+    true_procs        = ['VBF','ggH', 'ttH', 'VH'] #procs to run through cats
     #true_procs        = ['ggH', 'ttH'] #procs to run through cats
     if (not read_syst) and (not options.dump_weight_systs) : true_procs.append('Data') #is this line needed? guess so since could run mc and data together in a stat-only config
     if options.data_only: true_procs = ['Data'] #do data on its own (for memory really)

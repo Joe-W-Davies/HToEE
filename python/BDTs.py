@@ -51,7 +51,7 @@ class BDTHelpers(object):
 
         #attributes for the hp optmisation and cross validation
         self.clf              = xgb.XGBClassifier(objective='binary:logistic', n_estimators=100, 
-                                                  eta=0.05, maxDepth=4, min_child_weight=0.01, 
+                                                  eta=0.05, maxDepth=4, #min_child_weight=0.01, 
                                                   subsample=0.6, colsample_bytree=0.6, gamma=1)
 
         self.hp_grid_rnge     = {'learning_rate': [0.01, 0.05, 0.1, 0.3],
@@ -86,6 +86,7 @@ class BDTHelpers(object):
         mass_res_reweight: bool
            re-weight signal events by 1/sigma(m_ee), in training only.
         """
+
         
         mc_df_sig = self.data_obj.mc_df_sig
         mc_df_bkg = self.data_obj.mc_df_bkg
@@ -153,7 +154,7 @@ class BDTHelpers(object):
 
         self.X_data_train, self.X_data_test = train_test_split(self.data_obj.data_df[self.train_vars], train_size=self.train_frac, test_size=1-self.train_frac, shuffle=True, random_state=1357)
 
-    def create_X_and_y_three_class(self, third_class, mass_res_reweight=True):
+    def create_X_and_y_three_class_bkgs(self, third_class, mass_res_reweight=True):
         """
         Create X train/test and y train/test for three class BDR
 
@@ -164,6 +165,11 @@ class BDTHelpers(object):
         third_class: str
            name third bkg class for the classifier. Remaining classes: 1) all other bkgs, 2) signal
         """
+
+        #firstly, change binary loss to multiclass loss
+        self.clf              = xgb.XGBClassifier(objective='multi:softprob', num_classes=3, n_estimators=100, 
+                                                  eta=0.05, maxDepth=4, min_child_weight=0.01, 
+                                                  subsample=0.6, colsample_bytree=0.6, gamma=1)
 
         mc_df_sig = self.data_obj.mc_df_sig
         mc_df_bkg = self.data_obj.mc_df_bkg
@@ -184,8 +190,8 @@ class BDTHelpers(object):
                 bkg_sumw                = np.sum(mc_df_bkg[mc_df_bkg.y==0]['weight'].values)
                 third_class_sumw        = np.sum(mc_df_bkg[mc_df_bkg.y==1]['weight'].values)
                 sig_sumw                = np.sum(mc_df_sig['MoM_weight'].values)
-                mc_df_sig['eq_weight']  = (mc_df_sig['MoM_weight']) * (bkg_sumw/sig_sumw)
-                mc_df_bkg.loc[mc_df_bkg.y==1,'weight'] = mc_df_bkg.loc[mc_df_bkg.y==1,'weight'] * (bkg_sumw/third_class_sumw)
+                mc_df_sig['eq_weight']  = (mc_df_sig['MoM_weight'].copy()) * (bkg_sumw/sig_sumw)
+                mc_df_bkg.loc[mc_df_bkg.y==1,'weight'] = mc_df_bkg.loc[mc_df_bkg.y==1,'weight'].copy() * (bkg_sumw/third_class_sumw)
             else: 
                 #b_to_s_ratio = np.sum(mc_df_bkg['weight'].values)/np.sum(mc_df_sig['weight'].values)
                 #mc_df_sig['eq_weight'] = (mc_df_sig['weight']) * (b_to_s_ratio) 
@@ -229,6 +235,101 @@ class BDTHelpers(object):
                                                                                                                #test_size=1-self.train_frac,
                                                                                                                shuffle=True, random_state=1357
                                                                                                                )
+        self.X_train          = X_train.values
+        self.y_train          = y_train.values
+        self.train_weights    = train_w.values
+        self.proc_arr_train   = proc_arr_train
+
+        self.X_test           = X_test.values
+        self.y_test           = y_test.values
+        self.test_weights     = test_w.values
+        self.proc_arr_test    = proc_arr_test
+
+        self.X_data_train, self.X_data_test = train_test_split(self.data_obj.data_df[self.train_vars], train_size=self.train_frac, test_size=1-self.train_frac, shuffle=True, random_state=1357)
+
+
+    def create_X_and_y_three_class_signals(self, third_class, mass_res_reweight=True):
+        """
+        Create X train/test and y train/test for three class BDR
+
+        Arguments
+        ---------
+        mass_res_reweight: bool
+           re-weight signal events by 1/sigma(m_ee), in training only.
+        third_class: str
+           name third bkg class for the classifier. Remaining classes: 1) all other bkgs, 2) signal
+        """
+
+        #firstly, change binary loss to multiclass loss
+        self.clf              = xgb.XGBClassifier(objective='multi:softprob', num_classes=3, n_estimators=100, 
+                                                  eta=0.05, maxDepth=4, #min_child_weight=0.01, 
+                                                  subsample=0.6, colsample_bytree=0.6, gamma=1)
+
+        mc_df_sig = self.data_obj.mc_df_sig
+        mc_df_bkg = self.data_obj.mc_df_bkg
+
+        #add y_target label
+
+        sig_procs_key = [0,1]
+        sig_procs_mask = []
+        sig_procs_mask.append( mc_df_sig['proc'].ne(third_class) )
+        sig_procs_mask.append( mc_df_sig['proc'].eq(third_class) )
+        mc_df_sig['y'] = np.select(sig_procs_mask, sig_procs_key)
+        mc_df_bkg['y'] = np.full(self.data_obj.mc_df_bkg.shape[0], 2).tolist()
+
+        if self.eq_train: 
+            if mass_res_reweight:
+                #be careful not to change the real weight variable, or test scores will be invalid
+                mc_df_sig['MoM_weight'] = (mc_df_sig['weight']) * (1./mc_df_sig['dielectronSigmaMoM'])
+                third_class_sumw        = np.sum(mc_df_sig[mc_df_sig.y==1]['MoM_weight'].values)
+                sig_sumw                = np.sum(mc_df_sig[mc_df_sig.y==0]['MoM_weight'].values)
+                bkg_sumw                = np.sum(mc_df_bkg['weight'].values)
+                #have to declare column first if going to select as below
+                mc_df_sig['eq_weight'] = np.full(mc_df_sig.shape[0], np.nan)
+                mc_df_sig.loc[mc_df_sig.y==0,'eq_weight'] = mc_df_sig.loc[mc_df_sig.y==0,'MoM_weight'].copy() * (bkg_sumw/sig_sumw)
+                mc_df_sig.loc[mc_df_sig.y==1,'eq_weight'] = mc_df_sig.loc[mc_df_sig.y==1,'MoM_weight'].copy() * (bkg_sumw/third_class_sumw)
+            else:  pass
+                #bkg_sumw                = np.sum(mc_df_bkg[mc_df_bkg.y==0]['weight'].values)
+                #third_class_sumw        = np.sum(mc_df_bkg[mc_df_bkg.y==1]['weight'].values)
+                #sig_sumw                = np.sum(mc_df_sig['weight'].values)
+                #mc_df_sig['eq_weight']  = (mc_df_sig['weight']) * (bkg_sumw/sig_sumw)
+                #mc_df_bkg.loc[mc_df_bkg.y==1,'weight'] = mc_df_bkg.loc[mc_df_bkg.y==1,'weight'] * (bkg_sumw/third_class_sumw)
+            mc_df_bkg['eq_weight'] = mc_df_bkg['weight']
+
+            Z_tot = pd.concat([mc_df_sig, mc_df_bkg], ignore_index=True)
+            X_train, X_test, train_w, test_w, train_w_eqw, test_w_eqw, y_train, y_test, proc_arr_train, proc_arr_test = train_test_split(Z_tot[self.train_vars], Z_tot['weight'], 
+                                                                                                                                         Z_tot['eq_weight'], Z_tot['y'], Z_tot['proc'],
+                                                                                                                                         train_size=self.train_frac, 
+                                                                                                                                         #test_size=1-self.train_frac,
+                                                                                                                                         shuffle=True, 
+                                                                                                                                         random_state=1357
+                                                                                                                                         )
+            #NB: will never test/evaluate with equalised weights. This is explicitly why we set another train weight attribute, 
+            #    because for overtraining we need to evaluate on the train set (and hence need nominal MC train weights)
+            self.train_weights_eq = train_w_eqw.values
+        #elif mass_res_reweight:
+        #   mc_df_sig['MoM_weight'] = (mc_df_sig['weight']) * (1./mc_df_sig['dielectronSigmaMoM'])
+        #   Z_tot = pd.concat([mc_df_sig, mc_df_bkg], ignore_index=True)
+        #   X_train, X_test, train_w, test_w, train_w_eqw, test_w_eqw, y_train, y_test, proc_arr_train, proc_arr_test = train_test_split(Z_tot[self.train_vars], Z_tot['weight'], 
+        #                                                                                                                                Z_tot['MoM_weight'], Z_tot['y'], Z_tot['proc'],
+        #                                                                                                                                train_size=self.train_frac, 
+        #                                                                                                                                #test_size=1-self.train_frac,
+        #                                                                                                                                shuffle=True, 
+        #                                                                                                                                random_state=1357
+        #                                                                                                                                )
+        #   self.train_weights_eq = train_w_eqw.values
+        #   self.eq_train = True #use alternate weight in training. could probs rename this to something better
+        #else:
+        #   print ('not applying any reweighting...')
+        #   Z_tot = pd.concat([mc_df_sig, mc_df_bkg], ignore_index=True)
+        #   X_train, X_test, train_w, test_w, y_train, y_test, proc_arr_train, proc_arr_test = train_test_split(Z_tot[self.train_vars], 
+        #                                                                                                       Z_tot['weight'],
+        #                                                                                                       Z_tot['y'], Z_tot['proc'],
+        #                                                                                                       train_size=self.train_frac, 
+        #                                                                                                       #test_size=1-self.train_frac,
+        #                                                                                                       shuffle=True, random_state=1357
+        #                                                                                                       )
+
         self.X_train          = X_train.values
         self.y_train          = y_train.values
         self.train_weights    = train_w.values
@@ -434,15 +535,16 @@ class BDTHelpers(object):
     def compute_roc_three_class(self, third_class):
         """
         Compute the area under the associated ROC curves for three class problem, with mc weights. Also compute with blinded data as bkg
-
         """
 
         self.y_pred_train = self.clf.predict_proba(self.X_train)
         self.y_pred_test  = self.clf.predict_proba(self.X_test)
 
+        #array with signal = 1, everything else is 0
         sig_y_train = np.where(self.y_train==2, 1, 0)
         sig_y_test  = np.where(self.y_test==2, 1, 0)
                   
+        #array with bkg (DY and tt) 
         bkg_y_train = np.where(self.y_train>0, 0, 1)
         bkg_y_test  = np.where(self.y_test>0, 0, 1)
                   
@@ -451,8 +553,10 @@ class BDTHelpers(object):
 
         print ('area under roc curve for training set (sig vs rest) = %1.3f'%( roc_auc_score(sig_y_train, self.y_pred_train[:,2], sample_weight=self.train_weights) ))
         print ('area under roc curve for test set = %1.3f \n'%( roc_auc_score(sig_y_test, self.y_pred_test[:,2], sample_weight=self.test_weights) ))
+
         print ('area under roc curve for training set (bkg vs rest) = %1.3f'%( roc_auc_score(bkg_y_train, self.y_pred_train[:,0], sample_weight=self.train_weights) ))
         print ('area under roc curve for test set = %1.3f \n'%( roc_auc_score(bkg_y_test, self.y_pred_test[:,0], sample_weight=self.test_weights) ))
+
         print ('area under roc curve for training set (third class vs rest) = %1.3f'%( roc_auc_score(third_class_y_train, self.y_pred_train[:,1], sample_weight=self.train_weights) ))
         print ('area under roc curve for test set = %1.3f'%( roc_auc_score(third_class_y_test, self.y_pred_test[:,1], sample_weight=self.test_weights) ))
 
@@ -470,13 +574,13 @@ class BDTHelpers(object):
         #                                                               )
         
 
-    def plot_roc(self, out_tag):
+    def plot_roc(self, out_tag, AUC):
         """
         Method to plot the roc curve, using method from Plotter() class
         """
 
         roc_fig = self.plotter.plot_roc(self.y_train, self.y_pred_train, self.train_weights, 
-                                   self.y_test, self.y_pred_test, self.test_weights, out_tag=out_tag)
+                                   self.y_test, self.y_pred_test, self.test_weights, AUC=AUC, out_tag=out_tag)
 
         Utils.check_dir('{}/plotting/plots/{}'.format(os.getcwd(), out_tag))
         roc_fig.savefig('{0}/plotting/plots/{1}/{1}_ROC_curve.pdf'.format(os.getcwd(),out_tag))
@@ -533,3 +637,23 @@ class BDTHelpers(object):
             print('saving: {0}/plotting/plots/{1}/{1}_output_score_clf_class_{2}.pdf'.format(os.getcwd(), out_tag, clf_class))
             plt.close()
 
+    def plot_feature_importance(self, imp_type, out_tag=''):
+        """
+        Plot feature importance from native XGBoost functions. Would be nice to add Shapley values but no support for Python2
+        """
+
+        fig  = plt.figure(1)
+        axes = fig.gca()
+
+        feature_imps = self.clf.get_booster().get_score(importance_type=imp_type)
+        print {k: v for k, v in sorted(feature_imps.items(), key=lambda item: item[1])}
+        features = feature_imps.keys()
+        x = np.arange(len(features))
+        plt.bar(x, feature_imps.values())
+        axes.set_ylabel('Importance (gain)')
+        axes.set_xlabel('Feature')
+        axes.set_xticks(x, features)
+        plt.xticks(rotation=90)
+
+        fig.savefig('{0}/plotting/plots/{1}/{1}_feature_importances.pdf'.format(os.getcwd(), out_tag))
+        print('saving: {0}/plotting/plots/{1}/{1}_feature_importances.pdf'.format(os.getcwd(), out_tag))
