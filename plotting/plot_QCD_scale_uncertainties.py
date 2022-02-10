@@ -20,6 +20,7 @@ def main(options):
     with open(options.config, 'r') as config_file:
         config            = yaml.load(config_file)
         output_tag        = config['output_tag'] + 'with_QCD_scales'
+        mH                = config['mH']
 
         mc_dir            = config['mc_file_dir']
         mc_fnames         = config['mc_file_names']
@@ -39,7 +40,7 @@ def main(options):
                                            #Data handling stuff#
 
         #load the mc dataframe for all years
-        root_obj = ROOTHelpers(output_tag, mc_dir, mc_fnames, data_dir, data_fnames, proc_to_tree_name, train_vars, vars_to_add, presel)
+        root_obj = ROOTHelpers(output_tag, mc_dir, mc_fnames, data_dir, data_fnames, proc_to_tree_name, train_vars, vars_to_add, presel, mH=mH)
 
         for sig_obj in root_obj.sig_objects:
             root_obj.load_mc(sig_obj, reload_samples=options.reload_samples, read_QCD_arrays=True)

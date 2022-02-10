@@ -18,8 +18,8 @@ class Plotter(object):
     '''
     Class to plot input variables and output scores
     '''
-    #def __init__(self, data_obj, input_vars, sig_col='forestgreen', normalise=False, log=False, norm_to_data=False): 
-    def __init__(self, data_obj, input_vars, sig_col='red', normalise=False, norm_to_data=False): 
+    def __init__(self, data_obj, input_vars, sig_col='forestgreen', normalise=False, log=False, norm_to_data=False): 
+    #def __init__(self, data_obj, input_vars, sig_col='red', normalise=False, norm_to_data=False): 
         self.sig_df       = data_obj.mc_df_sig
         self.bkg_df       = data_obj.mc_df_bkg
         self.data_df      = data_obj.data_df
@@ -28,17 +28,21 @@ class Plotter(object):
         self.sig_labels   = np.unique(self.sig_df['proc'].values).tolist()
         self.bkg_labels   = np.unique(self.bkg_df['proc'].values).tolist()
 
-        self.bkg_labels   = ['EWKZ', 'DYMC', 'TT2L2Nu', 'TTSemiL'] # temp re-ordering of procs for VBF
-        self.bkg_colours  = ['#2c7bb6', '#abd9e9', '#ffffbf', '#fdae61'] # temp better for VBF
-        #self.bkg_colours  = ['#91bfdb', '#ffffbf', '#fc8d59'] #better for ggH
+        #self.bkg_labels   = ['EWKZ', 'DYMC', 'TT2L2Nu', 'TTSemiL'] # temp re-ordering of procs for VBF
+        #self.bkg_colours  = ['#2c7bb6', '#abd9e9', '#ffffbf', '#fdae61'] # temp better for VBF
         #self.bkg_colours  = ['#abd9e9', '#ffffbf', '#fc8d59'] #better for ggH
+
+        #self.bkg_labels   = ['EWKZ', 'DYMC', 'TT2L2Nu', 'TTSemiL'] # temp re-ordering of procs for VBF
+        #self.bkg_colours  = ['#2c7bb6', '#abd9e9', '#ffffbf'] # temp better for VBF
+        self.bkg_labels   = ['DYMC', 'TT2L2Nu', 'TTSemiL'] # temp re-ordering of procs for VBF
+        self.bkg_colours  = ['#abd9e9', '#ffffbf', '#fc8d59'] #better for ggH
 
         self.sig_colour   = sig_col
         self.normalise    = normalise
 
         self.sig_scaler   = 5*10**7
 
-        #get xrange from yaml config
+        #get xrange from yaml config #NOTE could just merge this into a single config at this point!
         with open('plotting/var_to_xrange.yaml', 'r') as plot_config_file:
             plot_config        = yaml.load(plot_config_file)
             self.var_to_xrange = plot_config['var_to_xrange']
@@ -52,6 +56,11 @@ class Plotter(object):
         with open('plotting/proc_to_legend_name.yaml', 'r') as plot_config_file:
             plot_proc_cfg    = yaml.load(plot_config_file)
             self.proc_to_leg = plot_proc_cfg['proc_to_leg_name']
+
+        #get proc name -> legend entry replacements from yaml config
+        with open('plotting/var_to_unit.yaml', 'r') as plot_config_file:
+            plot_proc_cfg    = yaml.load(plot_config_file)
+            self.var_to_unit = plot_proc_cfg['var_to_unit']
             
         missing_vars = [x for x in input_vars if x not in self.var_to_xrange.keys()]
         if len(missing_vars)!=0: raise IOError('Missing variables in var_to_xrange.py: {}'.format(missing_vars))
@@ -78,7 +87,7 @@ class Plotter(object):
         exponent = len(str_rep)-2 #minus one for the decimal point counted in string length
         return r'$\times 10^{-%s}$'%(exponent)
 
-    def plot_input(self, var, n_bins, out_label, ratio_plot=False, norm_to_data=False, extra_cuts=None, extra_tag=None, blind=False, return_props=False):
+    def plot_input(self, var, n_bins, out_label, ratio_plot=False, norm_to_data=False, extra_cuts=None, extra_tag=None, blind=False, return_props=False, merge_bkg_procs={}):
         if blind and ('dielectronMass' not in var): raise IOError('blinding only configured for plotting dielectron Mass!')
         if ratio_plot: 
             plt.rcParams.update({'figure.figsize':(6,5.8)})
@@ -89,6 +98,13 @@ class Plotter(object):
         else:
             fig  = plt.figure(1)
             axes = fig.gca()
+
+        if len(merge_bkg_procs)>0:
+            for p_new, p_olds in merge_bkg_procs.iteritems():
+                for p_old in p_olds:
+                    self.bkg_df.loc[self.bkg_df.proc==p_old,'proc'] = p_new
+                    self.bkg_labels.remove(p_old)
+                self.bkg_labels.append(p_new)
 
         bkg_stack      = []
         bkg_w_stack    = []
@@ -109,7 +125,7 @@ class Plotter(object):
             else: 
                 var_bkg     = self.bkg_df[self.bkg_df.proc==bkg][var].values
                 bkg_weights = self.bkg_df[self.bkg_df.proc==bkg]['weight'].values
-
+           
             bkg_stack.append(var_bkg)
             bkg_w_stack.append(bkg_weights)
             bkg_proc_stack.append(bkg)
@@ -162,8 +178,10 @@ class Plotter(object):
             bkg_stack_summed, _ = np.histogram(np.concatenate(bkg_stack), bins=bins, weights=np.concatenate(bkg_w_stack))
             sumw2_bkg, _  = np.histogram(np.concatenate(bkg_stack), bins=bins, weights=np.concatenate(bkg_w_stack)**2)
 
-        if self.normalise: axes.set_ylabel('Arbitrary Units', ha='right', y=1, size=13)
-        else: axes.set_ylabel('Events', ha='right', y=1, size=13)
+        if self.normalise: axes.set_ylabel('Arbitrary Units', ha='right', y=1, size=14)
+        else: 
+            x_err = abs(bins[-1] - bins[-2])
+            axes.set_ylabel('Events / {0:.2g}{1}'.format(x_err,self.var_to_unit[var]) , size=14, ha='right', y=1)
 
         #plot mc error 
         bkg_std_down, bkg_std_up  = self.poisson_interval(bkg_stack_summed, sumw2_bkg)                                                   
@@ -176,9 +194,9 @@ class Plotter(object):
             axes.set_ylim(bottom=100, top=current_top*20)
         else: axes.set_ylim(bottom=0, top=current_top*1.35)
 
-        #axes.legend(bbox_to_anchor=(0.9,0.97), ncol=2, prop={'size':10})
-        axes.legend(bbox_to_anchor=(0.96,0.97), ncol=2, prop={'size':9})
-        self.plot_cms_labels(axes)
+        axes.legend(bbox_to_anchor=(0.9,0.97), ncol=2, prop={'size':10})
+        #axes.legend(bbox_to_anchor=(0.96,0.97), ncol=2, prop={'size':9}) #mass plots
+        self.plot_cms_labels(axes,label='Work in progress')
            
         if ratio_plot:
             if blind: 
@@ -191,12 +209,12 @@ class Plotter(object):
                 bkg_std_up_ratio   = np.ones_like(bkg_std_up)   + ((bkg_std_up - bkg_stack_summed)/bkg_stack_summed)
             ratio.fill_between(bins, list(bkg_std_down_ratio)+[bkg_std_down_ratio[-1]], list(bkg_std_up_ratio)+[bkg_std_up_ratio[-1]], alpha=0.3, step="post", color="grey", lw=1, zorder=4)
 
-            ratio.set_xlabel('{}'.format(self.var_to_xstring[var]), ha='right', x=1, size=13)
-            ratio.set_ylabel('Data/MC', size=13)
+            ratio.set_xlabel('{}'.format(self.var_to_xstring[var]), ha='right', x=1, size=14)
+            ratio.set_ylabel('Data/MC', size=14)
             #ratio.set_ylim(0, 2)
             ratio.set_ylim(0.75, 1.25)
             ratio.grid(True, linestyle='dotted')
-        else: axes.set_xlabel('{}'.format(self.var_to_xstring[var]), ha='right', x=1, size=13)
+        else: axes.set_xlabel('{}'.format(self.var_to_xstring[var]), ha='right', x=1, size=14)
 
         axes.set_xlim(left=self.var_to_xrange[var][0], right=self.var_to_xrange[var][1])
        
@@ -212,7 +230,7 @@ class Plotter(object):
         if return_props: return fig,axes,ratio
 
     @classmethod 
-    def plot_cms_labels(self, axes, label='Work in progress', lumi='138',energy='(13 TeV)'):
+    def plot_cms_labels(self, axes, label='', lumi='138',energy='(13 TeV)'):
         axes.text(0, 1.01, r'\textbf{CMS} %s'%label, ha='left', va='bottom', transform=axes.transAxes, size=14)
         if len(lumi)==0: axes.text(1, 1.01, r'%s'%(energy), ha='right', va='bottom', transform=axes.transAxes, size=14)
         else: axes.text(1, 1.01, r'%s fb\textsuperscript{-1} %s'%(lumi,energy), ha='right', va='bottom', transform=axes.transAxes, size=14)
@@ -244,7 +262,7 @@ class Plotter(object):
         #np.savez('{}/models/{}_ROC_sig_bkg_arrays_NOJETVARS.npz'.format(os.getcwd(), out_tag), sig_eff_test=sig_eff_test, bkg_eff_test=bkg_eff_test)
         return fig
 
-    def plot_output_score(self, y_test, y_pred_test, test_weights, proc_arr_test, data_pred_test, MVA='BDT', ratio_plot=False, norm_to_data=False, log=False):
+    def plot_output_score(self, y_test, y_pred_test, test_weights, proc_arr_test, data_pred_test, MVA='BDT', ratio_plot=False, norm_to_data=False, log=False, merge_bkg_procs={}):
         if ratio_plot: 
             plt.rcParams.update({'figure.figsize':(6,5.8)})
             fig, axes = plt.subplots(nrows=2, ncols=1, dpi=200, sharex=True,
@@ -254,6 +272,13 @@ class Plotter(object):
         else:
             fig  = plt.figure(1)
             axes = fig.gca()
+
+        if len(merge_bkg_procs)>0:
+            for p_new, p_olds in merge_bkg_procs.iteritems():
+                for p_old in p_olds:
+                    proc_arr_test[proc_arr_test==p_old] = p_new
+                    self.bkg_labels.remove(p_old)
+                self.bkg_labels.append(p_new)
 
         #bins = np.linspace(0,1,41)
         bins = np.linspace(0,1,21)
@@ -308,8 +333,10 @@ class Plotter(object):
 
         #axes.legend(bbox_to_anchor=(0.97,0.97), ncol=2)
         axes.legend(bbox_to_anchor=(0.9,0.97), ncol=2, prop={'size':10})
-        if self.normalise: axes.set_ylabel('Arbitrary Units', ha='right', y=1, size=13)
-        else: axes.set_ylabel('Events', ha='right', y=1, size=13)
+        if self.normalise: axes.set_ylabel('Arbitrary Units', ha='right', y=1, size=14)
+        else: 
+            x_err = abs(bins[-1] - bins[-2])
+            axes.set_ylabel('Events / {0:.2g}'.format(x_err) , size=14, ha='right', y=1)
 
         if ratio_plot:
             ratio.errorbar(bin_centres, (data_binned/bkg_stack_summed), yerr=[ (data_binned-data_down)/bkg_stack_summed, (data_up-data_binned)/bkg_stack_summed], fmt='o', ms=4, color='black', capsize=0)
@@ -317,11 +344,11 @@ class Plotter(object):
             bkg_std_up_ratio   = np.ones_like(bkg_std_up)   + ((bkg_std_up - bkg_stack_summed)/bkg_stack_summed)
             ratio.fill_between(bins, list(bkg_std_down_ratio)+[bkg_std_down_ratio[-1]], list(bkg_std_up_ratio)+[bkg_std_up_ratio[-1]], alpha=0.3, step="post", color="grey", lw=1, zorder=4)
 
-            ratio.set_xlabel('{} Score'.format(MVA), ha='right', x=1, size=13)
+            ratio.set_xlabel('{} Score'.format(MVA), ha='right', x=1, size=14)
             ratio.set_ylim(0, 2)
             ratio.grid(True, linestyle='dotted')
-            ratio.set_ylabel('Data/MC', size=13)
-        else: axes.set_xlabel('{} Score'.format(MVA), ha='right', x=1, size=13)
+            ratio.set_ylabel('Data/MC', size=14)
+        else: axes.set_xlabel('{} Score'.format(MVA), ha='right', x=1, size=14)
         self.plot_cms_labels(axes)
 
         current_bottom, current_top = axes.get_ylim()
@@ -454,7 +481,7 @@ class Plotter(object):
         axes.set_xlabel('$N_{\mathrm{cat}}$', ha='right', x=1, size=13)
         axes.set_ylabel('Combined AMS', ha='right', y=1, size=13)
         axes.text(-0.15, 1.01, '{}'.format(exponent_label), ha='left', va='bottom', transform=axes.transAxes, size=11)
-        Plotter.plot_cms_labels(axes)
+        Plotter.plot_cms_labels(axes,label='Work in progress')
         fig.savefig('{}/categoryOpt/nCats_vs_AMS_{}.pdf'.format(os.getcwd(), out_tag))
         print('saved fig as: {}/categoryOpt/nCats_vs_AMS_{}.pdf'.format(os.getcwd(), out_tag))
 

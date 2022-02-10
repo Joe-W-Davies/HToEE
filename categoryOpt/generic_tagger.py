@@ -13,6 +13,7 @@ def main(options):
     with open(options.config, 'r') as config_file:
         config             = yaml.load(config_file)
         output_tag         = config['output_tag']
+        mH                 = config['mH']
 
         mc_dir             = config['mc_file_dir']
         mc_fnames          = config['mc_file_names']
@@ -52,7 +53,7 @@ def main(options):
         loosest_selection = 'dielectronMass > 100' 
  
         #load the mc dataframe for all years. Do not apply any specific preselection to sim samples
-        root_obj = ROOTHelpers(output_tag, mc_dir, mc_fnames, data_dir, data_fnames, proc_to_tree_name, all_train_vars, vars_to_add, loosest_selection, read_systs=(read_syst or options.dump_weight_systs)) 
+        root_obj = ROOTHelpers(output_tag, mc_dir, mc_fnames, data_dir, data_fnames, proc_to_tree_name, all_train_vars, vars_to_add, loosest_selection, read_systs=(read_syst or options.dump_weight_systs), mH=mH) 
         root_obj.no_lumi_scale()
         for sig_obj in root_obj.sig_objects:
             root_obj.load_mc(sig_obj, reload_samples=options.reload_samples, read_QCD_arrays=True)
@@ -76,6 +77,7 @@ def main(options):
 
     #if read_syst: combined_df = root_obj.mc_df_sig doesnt work with DNN set up since need bkg class in _init_ 
     #else: combined_df = pd.concat([root_obj.mc_df_sig, root_obj.mc_df_bkg])
+    root_obj.correct_energy_scale_2016(year="2016A",sf=1.0025)
     combined_df = pd.concat([root_obj.mc_df_sig, root_obj.mc_df_bkg])
 
 
@@ -113,7 +115,7 @@ def main(options):
                 tag_obj.eval_lstm(dnn_loaded, train_tag, root_obj, proc, object_vars, flat_obj_vars, event_vars)
 
             elif isinstance(model,str): tag_obj.eval_bdt(proc, model, proc_to_train_vars[proc])
-            else: raise IOError('Did not get a classifier models in correct format in config')
+            else: raise IOError('Did not get a classifier model with correct format in config')
 
     del root_obj
 
@@ -125,9 +127,9 @@ def main(options):
     #set up tag boundaries for each process being targeted
     tag_obj.decide_tag(tag_preselection, tag_boundaries)
     tag_obj.decide_priority()
-    branch_names = tag_obj.get_tree_names(tag_boundaries, year)
-    tag_obj.set_tree_names(tag_boundaries,options.dump_weight_systs,year)
-    tag_obj.fill_trees(branch_names, year, print_yields=not read_syst)
+    branch_names = tag_obj.get_tree_names(tag_boundaries, year, mH=mH)
+    tag_obj.set_tree_names(tag_boundaries,options.dump_weight_systs,year, mH=mH)
+    tag_obj.fill_trees(branch_names, year, print_yields=not read_syst, mH=mH)
     if not read_syst: 
         pass #tag_obj.plot_matrix(branch_names, output_tag)  #struct error?
     

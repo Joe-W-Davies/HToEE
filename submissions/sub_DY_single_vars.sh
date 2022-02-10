@@ -15,6 +15,7 @@ cp -r $MYDIR/python/ .
 cp -r $MYDIR/configs/ .
 cp -r $MYDIR/plotting/ .
 cp -r $MYDIR/models/ .
+cp -r $MYDIR/MetaData/ .
 cp $MYDIR/setup.sh .
 
 echo "DEBUG: dir is::"

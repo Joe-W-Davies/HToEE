@@ -587,7 +587,7 @@ class BDTHelpers(object):
         print('saving: {0}/plotting/plots/{1}/{1}_ROC_curve.pdf'.format(os.getcwd(),out_tag))
         plt.close()
 
-    def plot_output_score(self, out_tag, ratio_plot=False, norm_to_data=False, log=False):
+    def plot_output_score(self, out_tag, ratio_plot=False, norm_to_data=False, log=False,merge_bkg_procs={}):
         """
         Plot the output score for the classifier, for signal, background, and data
 
@@ -603,7 +603,7 @@ class BDTHelpers(object):
 
         output_score_fig = self.plotter.plot_output_score(self.y_test, self.y_pred_test, self.test_weights, 
                                                           self.proc_arr_test, self.clf.predict_proba(self.X_data_test.values)[:,1:],
-                                                          ratio_plot=ratio_plot, norm_to_data=norm_to_data, log=log)
+                                                          ratio_plot=ratio_plot, norm_to_data=norm_to_data, log=log, merge_bkg_procs=merge_bkg_procs)
 
         Utils.check_dir('{}/plotting/plots/{}'.format(os.getcwd(),out_tag))
         output_score_fig.savefig('{0}/plotting/plots/{1}/{1}_output_score.pdf'.format(os.getcwd(), out_tag))

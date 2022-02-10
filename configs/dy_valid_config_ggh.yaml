@@ -4,6 +4,10 @@
 output_tag:
     'DY_validation_ggH_BDT'
 
+#Higgs boson mass to pick up norms from!
+mH:
+  '125'
+
 #.root MC files for all years (sig and bkg) should be kept in this dir:
 mc_file_dir:
     '/vols/cms/jwd18/HToEESamples/MC/'
@@ -17,21 +21,21 @@ mc_file_names:
         ggH: #not read in
             #'2016A': 'ggH_UL2016A.root'
             #'2016B': 'ggH_UL2016B.root'
-            '2017': 'ggH_UL2017.root'
-            #'2018': 'ggH_UL2018.root'
+            #'2017': 'ggH_UL2017.root'
+            '2018': 'ggH_UL2018.root'
     bkg:
         DYMC:
             #'2016A': 'DY_UL2016A.root'
             #'2016B': 'DY_UL2016B.root'
-            '2017': 'DY_UL2017.root'
-            #'2018': 'DY_UL2018.root'
+            #'2017': 'DY_UL2017.root'
+            '2018': 'DY_UL2018.root'
 
 data_file_names:
     Data:
         #'2016A': 'Data_UL2016A.root'
         #'2016B': 'Data_UL2016B.root'
-        '2017': 'Data_UL2017.root'
-        #'2018': 'Data_UL2018.root'
+        #'2017': 'Data_UL2017.root'
+        '2018': 'Data_UL2018.root'
 
 #.root MC files for all years (bkg) should have these tree path:
 proc_to_tree_name:
@@ -58,7 +62,8 @@ vars_to_add:
 #preselection that will be applied to all samples.
 preselection: #NOTE: dont include upper bounds in this string! and keep the lower bounds loose
     #'dielectronMass > 83 and dielectronMass < 97 and leadElectronPtOvM>0.28 and subleadElectronPtOvM>0.2 and leadElectronPt>30 and subleadElectronPt>20'
-    'dielectronMass > 80 and leadElectronPtOvM>0.28 and subleadElectronPtOvM>0.2 and leadElectronPt>30 and subleadElectronPt>20'
+    #'dielectronMass > 80 and leadElectronPtOvM>0.28 and subleadElectronPtOvM>0.2 and leadElectronPt>30 and subleadElectronPt>20'
+    'dielectronMass > 75 and leadElectronPtOvM>0.28 and subleadElectronPtOvM>0.2 and leadElectronPt>30 and subleadElectronPt>20'
 
 cut_map:
     dielectronMass: ['>85','<95']

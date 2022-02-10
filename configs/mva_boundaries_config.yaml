@@ -14,10 +14,10 @@ models:
 
 boundaries: #pass25
     VBF: 
-        tag_0: 0.921
-        tag_1: 0.742
+        tag_0: 0.910
+        tag_1: 0.776
     ggH:
-        tag_0: 0.845
-        tag_1: 0.668
-        tag_2: 0.464
-        tag_3: 0.250
+        tag_0: 0.834
+        tag_1: 0.700
+        tag_2: 0.556
+        tag_3: 0.246

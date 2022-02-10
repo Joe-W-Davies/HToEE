@@ -6,7 +6,7 @@ output_tag:
 
 #Higgs boson mass to pick up norms from!
 mH:
-  '125'
+  '120'
 
 #.root MC files for all years (sig and bkg) should be kept in this dir:
 mc_file_dir:
@@ -20,28 +20,28 @@ data_file_dir:
 mc_file_names:
     sig:
         VBF:
-            '2016A': 'VBF_UL2016A.root'
+            '2016B': 'VBF_M120_UL2016B.root'
         ggH:
-            '2016A': 'ggH_UL2016A.root'
+            '2016B': 'ggH_M120_UL2016B.root'
         VH:
-            '2016A': 'VH_UL2016A.root'
+            '2016B': 'VH_M120_UL2016B.root'
         ttH:
-            '2016A': 'ttH_UL2016A.root'
+            '2016B': 'ttH_M120_UL2016B.root'
             
             
     bkg:
         DYMC:
-            '2016A': 'DY_UL2016A.root' #not used here!
+            '2016B': 'DY_UL2016B.root' #not used here!
 
 data_file_names:
     Data:
-        '2016A': 'Data_UL2016A.root'
+        '2016B': 'Data_UL2016B.root'
 
 #.root files for all years should have these tree paths. Keys should match keys above
 proc_to_tree_name:
     VBF:  'Events'
     ggH:  'Events'
-    VH:  'Events'
+    VH:   'Events'
     ttH:  'Events'
     DYMC: 'Events'
     Data: 'Events'

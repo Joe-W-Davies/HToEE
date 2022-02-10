@@ -39,8 +39,8 @@ class DYPlotter(object):
 	self.k_factor             = None
         self.clf                  = None
         self.proc                 = None
-        self.colours              = ['lightgrey','#CBCBE5'] #VBF
-        #self.colours              = ['#CBCBE5'] #ggH
+        #self.colours              = ['lightgrey','#CBCBE5'] #VBF
+        self.colours              = ['#CBCBE5'] #ggH
 
     def read_and_concat_dfs(self, reload_samples):
         """ read in dfs """
@@ -440,7 +440,7 @@ class DYPlotter(object):
         #ratio_down_excess[ratio_down_excess==0] =1
         
         axes[1].fill_between(bins, list(ratio_down_excess)+[ratio_down_excess[-1]], list(ratio_up_excess)+[ratio_up_excess[-1]] , alpha=0.3, step="post", color="lightcoral", lw=1 , zorder=2)
-        axes[1].set_ylabel('Data/MC', size=13)
+        axes[1].set_ylabel('Data/MC', size=14)
 
 
     def relabel_syst_vars(self, syst_name, cut_string, plot_var, syst_types=['Up','Down']):
@@ -514,7 +514,7 @@ class DYPlotter(object):
         for ext in syst_types:
             if do_mva: 
                 train_vars_minus_plot_var = [v for v in self.root_obj.train_vars if v!=plot_var] #protect against usual case where plot var is contained in training variable set
-                cut_vars += [v for v in self.cut_map.keys() if (v not in (train_vars_minus_plot_var+plot_var))]
+                cut_vars = [v for v in self.cut_map.keys() if (v not in (train_vars_minus_plot_var+plot_var))]
                 final_vars = cut_vars + train_vars_minus_plot_var
                 syst_dfs[ext] = self.root_obj.mc_df_bkg[[plot_var]+['proc']+final_vars] 
             else: 

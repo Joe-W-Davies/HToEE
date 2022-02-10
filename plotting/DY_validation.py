@@ -22,6 +22,7 @@ def main(options):
     with open(options.config, 'r') as config_file:
         config             = yaml.load(config_file)
         output_tag         = config['output_tag']
+        mH                 = config['mH']
 
         mc_dir             = config['mc_file_dir']
         mc_fnames          = config['mc_file_names']
@@ -50,10 +51,12 @@ def main(options):
                                            #Data handling stuff#
  
         #get the dataframe for all years. Do not apply any tight preselection to sim samples. Bit clunky with classes at the moment but finally fixed all the bugs
-        root_obj   = ROOTHelpers(output_tag, mc_dir, mc_fnames, data_dir, data_fnames, proc_to_tree_name, all_train_vars, vars_to_add, presel, read_systs=True)
+        root_obj   = ROOTHelpers(output_tag, mc_dir, mc_fnames, data_dir, data_fnames, proc_to_tree_name, all_train_vars, vars_to_add, presel, read_systs=True, mH=mH)
         dy_plotter = DYPlotter(root_obj,cut_map)
         dy_plotter.remove_unused_vars(options.var_name, options.systematics)
         dy_plotter.read_and_concat_dfs(options.reload_samples)
+        print dy_plotter.root_obj.mc_df_bkg.columns[:]
+        #dy_plotter.root_obj.correct_energy_scale_2016(year="2016A",sf=1.0025)
         dy_plotter.manage_dtypes(options.systematics, options.reload_samples)
 
         if options.reload_samples: #FIXME: reading in for the first time  wont re-weight sample! (OR BEING READ IN THE FOR THE FIRST TIME) (or get the reload samples flag out of the DataHandler object since trigger if no sample exist
@@ -90,7 +93,7 @@ def main(options):
             #syst stuff
             dy_plotter.plot_systematics(cut_str, axes, var, var_bins, options.systematics, do_mva=('mva' in options.var_name)) #FIXME: make this more general
 
-            axes = dy_plotter.set_canv_style(axes, var, var_bins)
+            axes = dy_plotter.set_canv_style(axes, var, var_bins, label="")
             axes[0].legend(bbox_to_anchor=(0.97,0.97), ncol=1)
             axes[1].set_xlabel(var_to_xstring[var], size=14, ha='right', x=1)
             Utils.check_dir('{}/plotting/plots/{}'.format(os.getcwd(), output_tag))

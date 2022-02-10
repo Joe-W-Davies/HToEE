@@ -208,7 +208,7 @@ class taggerBase(object):
             self.combined_df['priority_tag'].replace(tag_code, tag_name, inplace=True)
         self.combined_df['priority_tag'].replace(self.default_tag, 'NOTAG', inplace=True)
          
-    def get_tree_names(self, tag_boundaries, year):
+    def get_tree_names(self, tag_boundaries, year, mH=125):
         """
         Automatically get branch names, for each true proc.
         """
@@ -219,18 +219,18 @@ class taggerBase(object):
             branch_names[true_proc] = []
             for target_proc in self.tag_seq:  #for all events with proc = true_proc, which tag do they fall into?
                 for i_tag in range(len(tag_boundaries[target_proc].values())):
-                     if self.syst_name is not None: branch_names[true_proc].append('{}_125_13TeV_{}cat{}_{}01sigma'.format(true_proc.lower(), target_proc.lower(), i_tag, self.syst_name))
+                     if self.syst_name is not None: branch_names[true_proc].append('{}_{}_13TeV_{}cat{}_{}01sigma'.format(true_proc.lower(), mH, target_proc.lower(), i_tag, self.syst_name))
                      else:      
-                         if true_proc is not 'Data': branch_names[true_proc].append('{}_125_13TeV_{}cat{}'.format(true_proc.lower(), target_proc.lower(), i_tag ))
+                         if true_proc is not 'Data': branch_names[true_proc].append('{}_{}_13TeV_{}cat{}'.format(true_proc.lower(), mH, target_proc.lower(), i_tag ))
                          else: branch_names[true_proc].append('{}_13TeV_{}cat{}'.format(true_proc, target_proc.lower(), i_tag ))
 
-        if not path.isdir('output_trees/{}'.format(year)):
-            print 'making directory: {}'.format('output_trees/{}'.format(year))
-            system('mkdir -p %s' %'output_trees/{}'.format(year))
+        if not path.isdir('output_trees/MH_{}/{}'.format(mH,year)):
+            print 'making directory: {}'.format('output_trees/MH_{}/{}'.format(mH,year))
+            system('mkdir -p %s' %'output_trees/MH_{}/{}'.format(mH,year))
 
         return branch_names
 
-    def set_tree_names(self, tag_boundaries, dump_syst_weights, year):
+    def set_tree_names(self, tag_boundaries, dump_syst_weights, year, mH=125):
         """
         Use the tag priority and tag number (for each process) to decide on a final tag
         """
@@ -241,7 +241,7 @@ class taggerBase(object):
 
             if proc is not 'Data':
                 proc_label = proc.lower() #data needs captial D in tree name
-                label = '125_13TeV'
+                label = '{}_13TeV'.format(mH)
             else:
                 proc_label = proc 
                 label = '13TeV'
@@ -255,7 +255,7 @@ class taggerBase(object):
 
         self.combined_df['tree_name'] = np.select(mask, keys, default='NOTAG')
         self.combined_df['dZ'] = float(0.)
-        self.combined_df['CMS_hgg_mass'] = self.combined_df['dielectronMass'] 
+        self.combined_df['CMS_hgg_mass'] = self.combined_df['dielectronMass'].astype('float32')
 
         if dump_syst_weights:
             from syst_maps import weight_systs
@@ -277,7 +277,7 @@ class taggerBase(object):
                 self.combined_df[syst_name] = self.combined_df['{}'.format(syst_name)] * self.combined_df['centralObjectWeight'].copy()
                 self.tree_vars.append('{}'.format(syst_name))
 
-    def fill_trees(self, branch_names, year, print_yields=False):
+    def fill_trees(self, branch_names, year, print_yields=False, mH=125):
 
         #have to save individual trees as root files (fn=bn), then hadd over single proc on the command line, to get one proc file with all tag trees
         debug_cols = ['dielectronMass', 'leadElectronPtOvM', 'subleadElectronPtOvM', 'dijetMass', 'leadJetPt', 'subleadJetPt', 'ggH_mva', 'VBF_mva', 'VBF_analysis_tag', 'ggH_analysis_tag', 'priority_tag', 'proc', 'tree_name']
@@ -294,7 +294,7 @@ class taggerBase(object):
                 print bn
                 branch_selected_df = selected_df[selected_df.tree_name==bn]
                 print branch_selected_df[debug_cols].head(10)
-                root_pandas.to_root(branch_selected_df[self.tree_vars], 'output_trees/{}/{}_{}.root'.format(year,bn,year), key=bn)
+                root_pandas.to_root(branch_selected_df[self.tree_vars], 'output_trees/MH_{}/{}/{}_{}.root'.format(mH,year,bn,year), key=bn)
                 if print_yields: 
                     if proc is not 'Data': print_str += '\n Summed events in category {}: {}'.format( bn, np.sum(branch_selected_df['weight'])*lumi_map[year]*1000) 
                     else: print_str += '\n Summed events in category {}: {}'.format( bn, np.sum(branch_selected_df['weight'])) 

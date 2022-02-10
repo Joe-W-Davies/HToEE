@@ -4,6 +4,10 @@
 output_tag:
     'tag_seq_loose_lstm'
 
+#Higgs boson mass to pick up norms from!
+mH:
+  '125'
+
 #.root MC files for all years (sig and bkg) should be kept in this dir:
 mc_file_dir:
     '/vols/cms/jwd18/HToEESamples/MC/'

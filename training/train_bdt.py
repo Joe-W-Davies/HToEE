@@ -13,6 +13,7 @@ def main(options):
     with open(options.config, 'r') as config_file:
         config            = yaml.load(config_file)
         output_tag        = config['output_tag']
+        mH                = config['mH']
 
         mc_dir            = config['mc_file_dir']
         mc_fnames         = config['mc_file_names']
@@ -33,8 +34,8 @@ def main(options):
         if options.pt_reweight: 
             cr_selection = config['reweight_cr']
             output_tag += '_pt_reweighted'
-            root_obj = ROOTHelpers(output_tag, mc_dir, mc_fnames, data_dir, data_fnames, proc_to_tree_name, train_vars, vars_to_add, cr_selection)
-        else: root_obj = ROOTHelpers(output_tag, mc_dir, mc_fnames, data_dir, data_fnames, proc_to_tree_name, train_vars, vars_to_add, presel)
+            root_obj = ROOTHelpers(output_tag, mc_dir, mc_fnames, data_dir, data_fnames, proc_to_tree_name, train_vars, vars_to_add, cr_selection, mH=mH)
+        else: root_obj = ROOTHelpers(output_tag, mc_dir, mc_fnames, data_dir, data_fnames, proc_to_tree_name, train_vars, vars_to_add, presel, mH=mH)
 
         for sig_obj in root_obj.sig_objects:
             root_obj.load_mc(sig_obj, reload_samples=options.reload_samples)
@@ -105,7 +106,8 @@ def main(options):
             bdt_hee.train_classifier(root_obj.mc_dir, save=False, model_name=output_tag+'_clf')
             AUC = bdt_hee.compute_roc()
             bdt_hee.plot_roc(output_tag, AUC=AUC)
-            bdt_hee.plot_output_score(output_tag, ratio_plot=True, norm_to_data=(not options.pt_reweight), log=True)
+            bdt_hee.plot_output_score(output_tag, ratio_plot=True, norm_to_data=(not options.pt_reweight), log=False, merge_bkg_procs={'ttbarTotal':['TT2L2Nu','TTSemiL']})
+            #bdt_hee.plot_output_score(output_tag, ratio_plot=True, norm_to_data=(not options.pt_reweight), log=True, merge_bkg_procs={'ttbarTotal':['TT2L2Nu','TTSemiL']})
             #bdt_hee.plot_feature_importance(imp_type='gain', out_tag=output_tag)
 
 if __name__ == "__main__":

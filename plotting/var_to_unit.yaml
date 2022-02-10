@@ -1,0 +1,50 @@
+var_to_unit: 
+    'leadJetEn':               '~GeV'
+    'leadJetPt':               '~GeV'
+    'leadJetEta':              ''
+    'leadJetPhi':              '$^{\circ}$'
+    'leadJetQGL':              ''
+    'subleadJetEn':            '~GeV'
+    'subleadJetPt':            '~GeV'
+    'subleadJetEta':           ''
+    'subleadJetPhi':           '$^{\circ}$'
+    'subleadJetQGL':           ''
+    'subsubleadJetEn':         '~GeV'
+    'subsubleadJetPt':         '~GeV'
+    'subsubleadJetEta':        ''
+    'subsubleadJetPhi':        '$^{\circ}$'
+    'subsubleadJetQGL':        ''
+    'leadElectronPtOvM':       ''
+    'subleadElectronPtOvM':    ''
+    'dijetAbsDEta':            ''
+    'dijetDPhi':               '$^{\circ}$'
+    'dijetMass':               '~GeV'
+    'dijetDieleAbsDPhiTrunc':  '$^{\circ}$'
+    'dijetDieleAbsDEta':       ''
+    'dijetCentrality':         ''
+    'dijetMinDRJetEle':        ''
+    'leadElectronEta':         ''
+    'subleadElectronEta':      ''
+    'dielectronCosPhi':        '$^{\circ}$'
+    'dielectronPt':            '~GeV'
+    #'dielectronPt':            [0,180,false]
+    'leadJetDieleDPhi':        '$^{\circ}$'
+    'leadJetDieleDEta':        ''
+    'subleadJetDieleDPhi':     '$^{\circ}$'
+    'subleadJetDieleDEta':     ''
+   # 'nSoftJets':               [0.,6,false]
+   # 'metSumET':                [0,4000]
+   # 'metPt':                   [0,400]
+   # 'metPhi':                  [-3.,3]
+   # 'leadJetBTagScore':        [0,1]
+   # 'subleadJetBTagScore':     [0,1]
+   # 'subsubleadJetBTagScore':  [0,1]
+
+    #'eMinusDielectronDThetaLab': [0.,3.2,true]
+    #'n_jets':                  [0,3.,false]
+    #'dielectronMass':          [110,150,false]
+    #'dielectronMass':          [115,135,false]
+    'dielectronMass':          '~GeV'
+    'leadElectronPt':          '~GeV'
+    'subleadElectronPt':       '~GeV'
+

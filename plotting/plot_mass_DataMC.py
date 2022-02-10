@@ -13,6 +13,7 @@ def main(options):
     with open(options.config, 'r') as config_file:
         config            = yaml.load(config_file)
         output_tag        = config['output_tag']
+        mH                = config['mH']
 
         mc_dir            = config['mc_file_dir']
         mc_fnames         = config['mc_file_names']
@@ -27,8 +28,8 @@ def main(options):
 
         proc_to_tree_name = config['proc_to_tree_name']
 
-        sig_colour        = 'forestgreen'
-        #sig_colour        = 'red'
+        #sig_colour        = 'forestgreen'
+        sig_colour        = 'red'
  
                                            #Data handling stuff#
 
@@ -36,8 +37,8 @@ def main(options):
         if options.pt_reweight: 
             cr_selection = config['reweight_cr']
             output_tag += '_pt_reweighted'
-            root_obj = ROOTHelpers(output_tag, mc_dir, mc_fnames, data_dir, data_fnames, proc_to_tree_name, train_vars, vars_to_add, cr_selection)
-        else: root_obj = ROOTHelpers(output_tag, mc_dir, mc_fnames, data_dir, data_fnames, proc_to_tree_name, train_vars, vars_to_add, presel)
+            root_obj = ROOTHelpers(output_tag, mc_dir, mc_fnames, data_dir, data_fnames, proc_to_tree_name, train_vars, vars_to_add, cr_selection, mH=mH)
+        else: root_obj = ROOTHelpers(output_tag, mc_dir, mc_fnames, data_dir, data_fnames, proc_to_tree_name, train_vars, vars_to_add, presel, mH=mH)
 
         for sig_obj in root_obj.sig_objects:
             root_obj.load_mc(sig_obj, reload_samples=options.reload_samples)
@@ -78,7 +79,7 @@ def main(options):
             fig,axes,ratio = plotter.plot_input(options.mass_var_name, options.n_bins, output_tag, options.ratio_plot, norm_to_data=True, extra_cuts=extra_cuts, extra_tag=cat_counter, blind=False, return_props=True)
             #axes.text(0.04, 0.93, '{} \n category {} '.format(options.mva_proc,cat_counter), ha='left', va='top', transform=axes.transAxes, size=10)
             axes.text(0.1, 0.895, '{} \n category {} '.format(options.mva_proc,cat_counter), ha='center', va='center', transform=axes.transAxes, size=10)
-            #axes.set_ylim(0, 140)
+            axes.set_ylim(0, 140) #VBF cat 0
             ratio.set_ylim(0, 2)
             fig.savefig('{0}/plotting/plots/{1}/{1}_{2}_cat{3}.pdf'.format(os.getcwd(), output_tag, options.mass_var_name, cat_counter))
             cat_counter += 1

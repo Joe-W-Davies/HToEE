@@ -72,25 +72,25 @@ class ROOTHelpers(object):
     :type read_systs: bool
     """
 
-    def __init__(self, out_tag, mc_dir, mc_fnames, data_dir, data_fnames, proc_to_tree_name, train_vars, vars_to_add, presel_str='', read_systs=False):
+    def __init__(self, out_tag, mc_dir, mc_fnames, data_dir, data_fnames, proc_to_tree_name, train_vars, vars_to_add, presel_str='', read_systs=False, mH=125):
 
         self.years              = set()
         #self.lumi_map           = {'2016':35.9, '2017':41.5, '2018':59.7}
         self.lumi_map           = {'2016A':19.52, '2016B':16.81,'2017':41.5, '2018':59.7}
         self.lumi_scale         = True
-        self.XS_map             = {'ggH':48.58*5.2E-9, 'VBF':3.782*5.2E-9, 'ttH':0.5071*5.2E-9,'VH':(1.373+0.7612)*5.2E-9,  'ggH_Hgg':48.58*0.002, 'VBF_Hgg':3.782*0.002, 'DYMC': 6225.4, 'TT2L2Nu':86.61, 'TTSemiL':358.57, 'EWKZ':0.077, 'EWKZlowmass':1.014} #all in pb. also have BR for signals
 
-        #self.eff_acc            = {'2016A':{'ggH':0.3826363, 'VBF':0.3927412, 'ttH':0.3734778, 'ggH_Hgg':-999, 'VBF_Hgg':-999, 'DYMC':0.0627496, 'TT2L2Nu':0.0179350, 'TTSemiL':0.0000861, 'EWKZ':0.1682972, 'EWKZlowmass':0.1023668}, #reuse 2017
-        #                           '2016B':{'ggH':0.4020990, 'VBF':0.4122175, 'ttH':0.3920465, 'ggH_Hgg':-999, 'VBF_Hgg':-999, 'DYMC':0.0658343, 'TT2L2Nu':0.0188459, 'TTSemiL':0.0000891, 'EWKZ':0.1682972, 'EWKZlowmass':0.1023668},
-        #                           '2017': {'ggH':0.4084606, 'VBF':0.4197707, 'ttH':0.4044383, 'ggH_Hgg':-999, 'VBF_Hgg':-999, 'DYMC':0.0682661, 'TT2L2Nu':0.0192838, 'TTSemiL':0.0001088, 'EWKZ':0.1682972, 'EWKZlowmass':0.1023668},
-        #                           '2018': {'ggH':0.4120200, 'VBF':0.4225721, 'ttH':0.4067446, 'ggH_Hgg':-999, 'VBF_Hgg':-999, 'DYMC':0.0688194, 'TT2L2Nu':0.0194743, 'TTSemiL':0.0001059, 'EWKZ':0.1622357, 'EWKZlowmass':0.0991182}
-        #                           } #pass 22 + pass23 in 2016 
+        #get mass dependent XS and BR from cfg. Note only signals change as a fn of mH
+        with open('MetaData/XS_BR.yaml', 'r') as XSBR_config:
+            XSBR        = yaml.load(XSBR_config)
+            self.XS_map = XSBR['XS_map'][mH]
 
-        self.eff_acc            = {'2016A':{'ggH':0.3826363, 'VBF':0.3925888, 'VH':-999, 'ttH':-999, 'DYMC':0.0627496, 'TT2L2Nu':0.0179350, 'TTSemiL':0.0000861, 'EWKZ':0.1682972, 'EWKZlowmass':0.1023668}, #use 2017 eff acc for EWZ
-                                   '2016B':{'ggH':0.4020990, 'VBF':0.4116441, 'VH':-999, 'ttH':-999, 'DYMC':0.0658343, 'TT2L2Nu':0.0188459, 'TTSemiL':0.0000891, 'EWKZ':0.1682972, 'EWKZlowmass':0.1023668},
-                                   '2017': {'ggH':0.4084606, 'VBF':0.4197707, 'VH':-999, 'ttH':-999, 'DYMC':0.0682661, 'TT2L2Nu':0.0192838, 'TTSemiL':0.0001088, 'EWKZ':0.1682972, 'EWKZlowmass':0.1023668},
-                                   '2018': {'ggH':0.4119919, 'VBF':0.4226484, 'VH':-999, 'ttH':-999, 'DYMC':0.0688194, 'TT2L2Nu':0.0194743, 'TTSemiL':0.0001059, 'EWKZ':0.1622357, 'EWKZlowmass':0.0991182}
-                                   } #CMS week + approval. Still have dodgy data samples in 2016 pre-VFP
+        #get mass dependent eff and acc from cfg. Note only signals change as fn of mH
+        with open('MetaData/eff_acc.yaml', 'r') as effAcc_config:
+            effAcc       = yaml.load(effAcc_config)
+            self.eff_acc = effAcc['eff_acc'][mH]
+
+        self.MH = mH
+
         self.out_tag            = out_tag
         self.mc_dir             = mc_dir #FIXME: remove '\' using if_ends_with()
         self.data_dir           = data_dir
@@ -105,7 +105,6 @@ class ROOTHelpers(object):
 
         self.train_vars         = train_vars
         self.cut_string         = presel_str
-
 
         self.sig_procs          = []
         self.sig_objects        = []
@@ -186,22 +185,25 @@ class ROOTHelpers(object):
         print 'Scaling year {} by : {}'.format(year,self.lumi_map[year]/35.9)
         self.mc_df_sig['weight'] = self.mc_df_sig['weight'] * sf
 
-    def correct_energy_scale_2016(self, years='2016'):
+    def correct_energy_scale_2016(self, year='2016A', sf=1.003):
         """
         Note: must have run the SF derivation for 2016 pre-VFP samples first
         """
+        from ROOT import TLorentzVector
 
+        def calc_dielectron_mass(row):
+        #get position vector of negative e in rest frame of ee system
+            e_1 = TLorentzVector()
+            e_1.SetPtEtaPhiM(row['shiftedLeadElectronPt'], row['leadElectronEta'], row['leadElectronPhi'], row['leadElectronMass'])
+            e_2 = TLorentzVector()
+            e_2.SetPtEtaPhiM(row['shiftedSubleadElectronPt'], row['subleadElectronEta'], row['subleadElectronPhi'], row['subleadElectronMass'])
+            return (e_1 + e_2).M()
 
-        #with open('/vols/cms/jwd18/Hee/MLCategorisation/CMSSW_10_2_0/src/HToEE/MetaData/data_ptscale_sfs.pickle', 'wb') as handle:
-        #    pickle.dump(year_to_scale_factors, handle, protocol=pickle.HIGHEST_PROTOCOL)         
+        self.data_df['shiftedLeadElectronPt']    = self.data_df['leadElectronPt']*sf
+        self.data_df['shiftedSubleadElectronPt'] = self.data_df['subleadElectronPt']*sf
+        self.data_df['dielectronMass']           = self.data_df.apply(calc_dielectron_mass, axis=1)
 
-        #df_bkg_year_i = self.mc_df_bkg.query('year=="{}"'.format(year))
-        #df_data_year_i = self.data_df.query('year=="{}"'.format(year))
-        #norm_factor = np.sum(df_data_year_i['weight']) / np.sum(df_bkg_year_i['weight'])
-        #df_bkg_year_i['weight'] *= norm_factor
-        #normed_year_dfs_bkg.append(df_bkg_year_i)
-
-        #self.mc_df_bkg = pd.concat( normed_year_dfs_bkg )
+            
 
     def encode_year(self):
         """
@@ -335,10 +337,16 @@ class ROOTHelpers(object):
         df: pandas dataframe that was read in.
         """
 
-        df = pd.read_csv('{}{}_{}_df_{}.csv'.format(df_dir, proc, self.out_tag, year))
-        missing_vars = [x for x in self.train_vars if x not in list(df.columns)+list(self.vars_to_add.keys())]
-        if len(missing_vars)!=0: raise IOError('Missing variables in dataframe: {}. Reload with option -r and try again'.format(missing_vars)) #will actually catch this error but still exits later on
-        else: print('Sucessfully loaded DataFrame: {}{}_{}_df_{}.csv'.format(df_dir, proc, self.out_tag, year))
+        if proc != 'Data': 
+            df = pd.read_csv('{}{}_M{}_{}_df_{}.csv'.format(df_dir, proc, self.MH, self.out_tag, year))
+            missing_vars = [x for x in self.train_vars if x not in list(df.columns)+list(self.vars_to_add.keys())]
+            if len(missing_vars)!=0: raise IOError('Missing variables in dataframe: {}. Reload with option -r and try again'.format(missing_vars)) #will actually catch this error but still exits later on
+            else: print('Sucessfully loaded DataFrame: {}{}_M125_{}_df_{}.csv'.format(df_dir, proc, self.MH, self.out_tag, year))
+        else: 
+            df = pd.read_csv('{}{}_{}_df_{}.csv'.format(df_dir, proc, self.out_tag, year))
+            missing_vars = [x for x in self.train_vars if x not in list(df.columns)+list(self.vars_to_add.keys())]
+            if len(missing_vars)!=0: raise IOError('Missing variables in dataframe: {}. Reload with option -r and try again'.format(missing_vars)) #will actually catch this error but still exits later on
+            print('Sucessfully loaded DataFrame: {}{}_{}_df_{}.csv'.format(df_dir, proc, self.out_tag, year))
 
         return df    
 
@@ -419,8 +427,12 @@ class ROOTHelpers(object):
         #save everything
         if self.save_dfs:
             Utils.check_dir(file_dir+'DataFrames/') 
-            df.to_csv('{}/{}_{}_df_{}.csv'.format(file_dir+'DataFrames', proc_tag, self.out_tag, year))
-            print('Saved dataframe: {}/{}_{}_df_{}.csv'.format(file_dir+'DataFrames', proc_tag, self.out_tag, year))
+            if flag!='Data': 
+                df.to_csv('{}/{}_M{}_{}_df_{}.csv'.format(file_dir+'DataFrames', proc_tag, self.MH, self.out_tag, year))
+                print('Saved dataframe: {}/{}_M{}_{}_df_{}.csv'.format(file_dir+'DataFrames', proc_tag, self.MH, self.out_tag, year))
+            else: 
+                df.to_csv('{}/{}_{}_df_{}.csv'.format(file_dir+'DataFrames', proc_tag, self.out_tag, year))
+                print('Saved dataframe: {}/{}_{}_df_{}.csv'.format(file_dir+'DataFrames', proc_tag, self.out_tag, year))
 
         return df
 

@@ -11,6 +11,7 @@ def main(options):
     with open(options.config, 'r') as config_file:
         config            = yaml.load(config_file)
         output_tag        = config['output_tag']
+        mH                = config['mH']
 
         mc_dir            = config['mc_file_dir']
         mc_fnames         = config['mc_file_names']
@@ -25,16 +26,16 @@ def main(options):
 
         proc_to_tree_name = config['proc_to_tree_name']
 
-        #sig_colour        = 'forestgreen'
-        sig_colour        = 'red'
+        sig_colour        = 'forestgreen'
+        #sig_colour        = 'red'
  
                                            #Data handling stuff#
         #load the mc dataframe for all years
         if options.pt_reweight: 
             cr_selection = config['reweight_cr']
             output_tag += '_pt_reweighted'
-            root_obj = ROOTHelpers(output_tag, mc_dir, mc_fnames, data_dir, data_fnames, proc_to_tree_name, train_vars, vars_to_add, cr_selection)
-        else: root_obj = ROOTHelpers(output_tag, mc_dir, mc_fnames, data_dir, data_fnames, proc_to_tree_name, train_vars, vars_to_add, presel)
+            root_obj = ROOTHelpers(output_tag, mc_dir, mc_fnames, data_dir, data_fnames, proc_to_tree_name, train_vars, vars_to_add, cr_selection, mH=mH)
+        else: root_obj = ROOTHelpers(output_tag, mc_dir, mc_fnames, data_dir, data_fnames, proc_to_tree_name, train_vars, vars_to_add, presel, mH=mH)
 
         for sig_obj in root_obj.sig_objects:
             root_obj.load_mc(sig_obj, reload_samples=options.reload_samples)
@@ -51,11 +52,10 @@ def main(options):
                                             #Plotter stuff#
  
         #set up X, w and y, train-test 
-        #plotter = Plotter(root_obj, train_vars, sig_col=sig_colour, norm_to_data=True)
-        plotter = Plotter(root_obj, train_vars, sig_col=sig_colour, norm_to_data=False)
+        #plotter = Plotter(root_obj, train_vars, sig_col=sig_colour, norm_to_data=False)
         for var in train_vars:
-        #for var in ['dielectronPt']:
-            plotter.plot_input(var, options.n_bins, output_tag, options.ratio_plot, norm_to_data=False)
+            plotter = Plotter(root_obj, train_vars, sig_col=sig_colour, norm_to_data=True)
+            plotter.plot_input(var, options.n_bins, output_tag, options.ratio_plot, norm_to_data=True, merge_bkg_procs={'ttbarTotal':['TT2L2Nu','TTSemiL']})
 
 if __name__ == "__main__":
 

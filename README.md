@@ -16,8 +16,7 @@ For this, use the `training/train_bdt.py` script. This requires a configuration 
 
 An example config for VBF training can be found here:  `bdt_config_vbf.yaml`
 
-Note that for each sample, the effeciency x acceptance, and XS (x BR) should also be specified in the constructor of the `python/DataHandling.py` class.
-
+Note that for each sample, the effeciency x acceptance, and XS (x BR) should also be specified in `MetaData/`.
 
 The command to train a simple VBF vs Bkg BDT with a train-test splitting fraction of 0.7, is:
 
