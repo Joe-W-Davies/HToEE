@@ -27,12 +27,12 @@ mc_file_names:
             '2016B': 'DY_UL2016B.root'
             '2017': 'DY_UL2017.root'
             '2018': 'DY_UL2018.root'
-            #
-        #EWKZlowmass: #cant even see this in the plot so remove it
-            #'2016A': 'EWKlowmass_2017.root' #dont have UL right now
-            #'2016B': 'EWKlowmass_2017.root' #dont have UL right now
-            #'2017': 'EWKlowmass_2017.root'
-            #'2018': 'EWKlowmass_2018.root'
+            
+        EWKZlowmass: #shows up at high scores (but dont include it in the legend since small contribution)
+            '2016A': 'EWKlowmass_2017.root' #dont have UL right now
+            '2016B': 'EWKlowmass_2017.root' #dont have UL right now
+            '2017': 'EWKlowmass_2017.root'
+            '2018': 'EWKlowmass_2018.root'
 
 data_file_names:
     Data:
@@ -65,10 +65,11 @@ vars_to_add:
 # "baseline" selection that will be applied to all samples. None of these variables should be inputs!
 preselection: #NOTE: dont include upper bounds in this string! and keep the lower bounds loose
     #'dielectronMass > 80 and dielectronMass < 100 and leadElectronPtOvM>0.3 and subleadElectronPtOvM>0.2 and leadElectronPt>30 and subleadElectronPt>20 and dijetMass>200 and leadJetPt>30 and subleadJetPt>20'
-    'dielectronMass > 80'
+    'dielectronMass > 77 and dijetMass>200'
 
 cut_map:
-    dielectronMass: ['>85','<95']
+    #dielectronMass: ['>85','<95']
+    dielectronMass: ['>80','<100']
     leadElectronPtOvM: ['>0.333']
     subleadElectronPtOvM: ['>0.25']
     leadElectronPt: ['>35']
