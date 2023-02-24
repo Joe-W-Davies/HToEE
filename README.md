@@ -1,4 +1,4 @@
-# Categorisation of VBF and ggH HToEE events
+# Tools for a H &#8594; ee search
 
 ## Setup
 
