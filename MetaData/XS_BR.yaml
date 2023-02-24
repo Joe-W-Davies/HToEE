@@ -1,0 +1,41 @@
+XS_map: #all in pb. also have BR for signals
+    '125':
+        'ggH': 2.52616E-07 #48.58*5.2E-9
+        'VBF': 1.96664e-08 #3.782*5.2E-9
+        #'ggH': 1 #48.58*5.2E-9
+        #'VBF': 1 #3.782*5.2E-9
+        'ttH': 2.63692e-09 #0.5071*5.2E-9
+        'VH': 1.109784e-08 #(1.373+0.7612)*5.2E-9
+        'ggH_Hgg': 0.09716 #48.58*0.002
+        'VBF_Hgg': 0.007564 #3.782*0.002
+        'ggHDalitz': 1
+        'VBFDalitz': 1
+        'DYMC': 6225.4
+        'TT2L2Nu': 86.61
+        'TTSemiL': 358.57
+        'EWKZ': 0.077
+        'EWKZlowmass': 1.014
+    '120':
+        'ggH': 3.0288E-07 #52.22*5.8E-9
+        'VBF': 2.2823E-08 #3.935*5.8E-9
+        'ttH': 3.30426E-09  #0.5697*5.8E-9
+        'VH': 1.349196E-08 #(1.565+0.7612)*5.8E-9 NOTE: ggZH XS is same as 125 
+        'ggHDalitz': 1
+        'VBFDalitz': 1
+        'DYMC': 6225.4
+        'TT2L2Nu': 86.61
+        'TTSemiL': 358.57
+        'EWKZ': 0.077
+        'EWKZlowmass': 1.014
+    '130':
+        'ggH': 2.03895E-07 #45.31*4.5E-9
+        'VBF': 1.63665E-08 #3.637*4.5E-9
+        'ttH': 2.04255E-09 #0.4539*4.5E-9
+        'VH': 8.8659E-09 #(1.209+0.7612)*4.5E-9 NOTE: ggZH XS is same as 125 
+        'ggHDalitz': 1
+        'VBFDalitz': 1
+        'DYMC': 6225.4
+        'TT2L2Nu': 86.61
+        'TTSemiL': 358.57
+        'EWKZ': 0.077
+        'EWKZlowmass': 1.014

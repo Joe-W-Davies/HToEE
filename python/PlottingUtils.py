@@ -7,6 +7,7 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 try:
      plt.style.use("cms10_6_HP")
+     #plt.style.use("CMS_helvetica_x_mplhep") 
 except IOError:
      import warnings
      warnings.warn('Could not import user defined matplot style file. Using default style settings...')
@@ -28,18 +29,36 @@ class Plotter(object):
         self.sig_labels   = np.unique(self.sig_df['proc'].values).tolist()
         self.bkg_labels   = np.unique(self.bkg_df['proc'].values).tolist()
 
-        #self.bkg_labels   = ['EWKZ', 'DYMC', 'TT2L2Nu', 'TTSemiL'] # temp re-ordering of procs for VBF
-        #self.bkg_colours  = ['#2c7bb6', '#abd9e9', '#ffffbf', '#fdae61'] # temp better for VBF
+
+
+        #For thesis
+
+        self.bkg_labels   = ['EWKZ', 'DYMC', 'TT2L2Nu', 'TTSemiL'] # temp re-ordering of procs for VBF
+        self.bkg_colours  = ['#2c7bb6', '#abd9e9', '#ffffbf', '#fdae61'] # temp better for VBF
+
+        #self.bkg_labels   = ['EWKZ', 'DYMC', 'TT2L2Nu', 'TTSemiL'] # temp re-ordering of procs for VBF BDT Data/MC
+        #self.bkg_colours  = ['#2c7bb6', '#abd9e9', '#ffffbf'] # temp better for VBF
+
+        #self.bkg_labels   = ['DYMC', 'TT2L2Nu', 'TTSemiL'] # temp re-ordering of procs for ggH
         #self.bkg_colours  = ['#abd9e9', '#ffffbf', '#fc8d59'] #better for ggH
 
-        #self.bkg_labels   = ['EWKZ', 'DYMC', 'TT2L2Nu', 'TTSemiL'] # temp re-ordering of procs for VBF
-        #self.bkg_colours  = ['#2c7bb6', '#abd9e9', '#ffffbf'] # temp better for VBF
-        self.bkg_labels   = ['DYMC', 'TT2L2Nu', 'TTSemiL'] # temp re-ordering of procs for VBF
-        self.bkg_colours  = ['#abd9e9', '#ffffbf', '#fc8d59'] #better for ggH
 
+
+        # FOR PAPER:
+
+        #VBF
+        #self.bkg_labels   = ['EWKZ', 'DYMC', 'TT2L2Nu', 'TTSemiL'] # temp re-ordering of procs for VBF BDT Data/MC
+        #self.bkg_colours  = ['#2c7bb6', '#abd9e9', '#ffeda0'] # temp better for VBF
+        #ggH
+        #self.bkg_labels   = ['DYMC', 'TT2L2Nu', 'TTSemiL'] # temp re-ordering of procs for ggH
+        #self.bkg_colours  = ['#abd9e9', '#ffeda0', '#fc8d59'] #better for ggH
+
+        #############
+ 
         self.sig_colour   = sig_col
         self.normalise    = normalise
 
+        #self.sig_scaler   = (5*10**7)/(0.25)
         self.sig_scaler   = 5*10**7
 
         #get xrange from yaml config #NOTE could just merge this into a single config at this point!
@@ -138,7 +157,8 @@ class Plotter(object):
 
         #add sig mc
         #NOTE add this back in if not doing blinded mee plots
-        axes.hist(var_sig, bins=bins, label=self.proc_to_leg[self.sig_labels[0]]+r' ($\mathrm{H}\rightarrow\mathrm{ee}$) '+self.num_to_str(self.sig_scaler), weights=sig_weights*(self.sig_scaler), histtype='step', color=self.sig_colour, zorder=10)
+        #axes.hist(var_sig, bins=bins, label=self.proc_to_leg[self.sig_labels[0]]+r' ($\mathrm{H}\rightarrow\mathrm{ee}$) '+self.num_to_str(self.sig_scaler), weights=sig_weights*(self.sig_scaler), histtype='step', color=self.sig_colour
+        axes.hist(var_sig, bins=bins, label=self.proc_to_leg[self.sig_labels[0]]+self.num_to_str(self.sig_scaler), weights=sig_weights*(self.sig_scaler), histtype='step', color=self.sig_colour, zorder=10)
 
         #data
         if extra_cuts is not None:  data_binned, bin_edges = np.histogram(self.data_df.query(extra_cuts)[var].values, bins=bins)
@@ -185,6 +205,17 @@ class Plotter(object):
 
         #plot mc error 
         bkg_std_down, bkg_std_up  = self.poisson_interval(bkg_stack_summed, sumw2_bkg)                                                   
+
+        #dont even ask...
+        #bkg_std_down[np.isnan(bkg_std_down)]=( 10- ((10)**0.5)) #FIXME
+        #bkg_std_up[np.isnan(bkg_std_up)]=( 10+ ((10)**0.5)) #FIXME
+        #bkg_stack_summed[bkg_stack_summed<0]=10 #FIXME
+        #ratio.arrow(120.76923077, 1.5, 0, 0.5, head_width=0.25, head_length=0.15,length_includes_head=True,  ec='black') #FIXME
+        #ratio.arrow(133.07692308, 1.5, 0, 0.5, head_width=0.25, head_length=0.15,length_includes_head=True,  ec='black') #FIXME
+        #ratio.arrow(139.23076923, 1.5, 0, 0.5, head_width=0.25, head_length=0.15,length_includes_head=True,  ec='black') #FIXME
+        #ratio.arrow(142.30769231, 1.5, 0, 0.5, head_width=0.25, head_length=0.15,length_includes_head=True,  ec='black') #FIXME
+        #ratio.arrow(145.38461538, 1.5, 0, 0.5, head_width=0.25, head_length=0.15,length_includes_head=True,  ec='black') #FIXME
+
         axes.fill_between(bins, list(bkg_std_down)+[bkg_std_down[-1]], list(bkg_std_up)+[bkg_std_up[-1]], alpha=0.3, step="post", color="grey", lw=1, zorder=4, label='Simulation stat. unc.')
 
         #change axes limits
@@ -192,11 +223,12 @@ class Plotter(object):
         if self.var_to_xrange[var][2]:
             axes.set_yscale('log', nonposy='clip')
             axes.set_ylim(bottom=100, top=current_top*20)
-        else: axes.set_ylim(bottom=0, top=current_top*1.35)
+        #else: axes.set_ylim(bottom=0, top=current_top*1.35)
+        else: axes.set_ylim(bottom=0, top=current_top*1.5)
 
         axes.legend(bbox_to_anchor=(0.9,0.97), ncol=2, prop={'size':10})
-        #axes.legend(bbox_to_anchor=(0.96,0.97), ncol=2, prop={'size':9}) #mass plots
-        self.plot_cms_labels(axes,label='Work in progress')
+        #axes.legend(bbox_to_anchor=(0.96,0.97), ncol=2, prop={'size':9}) #mass plots #FIXME
+        self.plot_cms_labels(axes,label='Work in progress',lumi="138")
            
         if ratio_plot:
             if blind: 
@@ -227,10 +259,13 @@ class Plotter(object):
             print('saving: {0}/plotting/plots/{1}/{1}_{2}.pdf'.format(os.getcwd(), out_label, var))
         plt.close()
 
-        if return_props: return fig,axes,ratio
+        if return_props:
+            if ratio_plot: return fig,axes,ratio
+            else: return fig, axes
 
     @classmethod 
     def plot_cms_labels(self, axes, label='', lumi='138',energy='(13 TeV)'):
+        #axes.text(0, 1.01, r'\textbf{CMS} \emph{%s}'%label, ha='left', va='bottom', transform=axes.transAxes, size=14)
         axes.text(0, 1.01, r'\textbf{CMS} %s'%label, ha='left', va='bottom', transform=axes.transAxes, size=14)
         if len(lumi)==0: axes.text(1, 1.01, r'%s'%(energy), ha='right', va='bottom', transform=axes.transAxes, size=14)
         else: axes.text(1, 1.01, r'%s fb\textsuperscript{-1} %s'%(lumi,energy), ha='right', va='bottom', transform=axes.transAxes, size=14)
@@ -259,10 +294,11 @@ class Plotter(object):
         self.fig = fig
 
         np.savez('{}/models/{}_ROC_sig_bkg_arrays.npz'.format(os.getcwd(), out_tag), sig_eff_test=sig_eff_test, bkg_eff_test=bkg_eff_test)
+        print('saving: {}/models/{}_ROC_sig_bkg_arrays.npz'.format(os.getcwd(), out_tag))
         #np.savez('{}/models/{}_ROC_sig_bkg_arrays_NOJETVARS.npz'.format(os.getcwd(), out_tag), sig_eff_test=sig_eff_test, bkg_eff_test=bkg_eff_test)
         return fig
 
-    def plot_output_score(self, y_test, y_pred_test, test_weights, proc_arr_test, data_pred_test, MVA='BDT', ratio_plot=False, norm_to_data=False, log=False, merge_bkg_procs={}):
+    def plot_output_score(self, y_test, y_pred_test, test_weights, proc_arr_test, data_pred_test, MVA='BDT', ratio_plot=False, norm_to_data=False, log=False, merge_bkg_procs={}, split_signal_procs=False):
         if ratio_plot: 
             plt.rcParams.update({'figure.figsize':(6,5.8)})
             fig, axes = plt.subplots(nrows=2, ncols=1, dpi=200, sharex=True,
@@ -283,9 +319,6 @@ class Plotter(object):
         #bins = np.linspace(0,1,41)
         bins = np.linspace(0,1,21)
 
-        bkg_stack      = []
-        bkg_w_stack    = []
-        bkg_proc_stack = []
 
         sig_scores = y_pred_test.ravel()  * (y_test==1)
         sig_w_true = test_weights.ravel() * (y_test==1)
@@ -297,6 +330,9 @@ class Plotter(object):
             sig_w_true /= np.sum(sig_w_true)
             bkg_w_true /= np.sum(bkg_w_true)
 
+        bkg_stack      = []
+        bkg_w_stack    = []
+        bkg_proc_stack = []
         for bkg in self.bkg_labels:
             bkg_score     = bkg_scores * (proc_arr_test==bkg)
             bkg_weights   = bkg_w_true * (proc_arr_test==bkg)
@@ -304,8 +340,16 @@ class Plotter(object):
             bkg_w_stack.append(bkg_weights)
             bkg_proc_stack.append(bkg)
 
+        if split_signal_procs:
+            for sproc in self.sig_labels:
+                sig_score     = sig_scores * (proc_arr_test==sproc)
+                sig_weights   = sig_w_true * (proc_arr_test==sproc)
+                axes.hist(sig_score, bins=bins, label=self.proc_to_leg[sproc]+self.num_to_str(self.sig_scaler), weights=sig_weights*self.sig_scaler, histtype='step', color=self.sig_colour)
+
         #sig
-        axes.hist(sig_scores, bins=bins, label=self.proc_to_leg[self.sig_labels[0]]+r' ($\mathrm{H}\rightarrow\mathrm{ee}$) '+self.num_to_str(self.sig_scaler), weights=sig_w_true*(self.sig_scaler), histtype='step', color=self.sig_colour)
+        else:
+            axes.hist(sig_scores, bins=bins, label=self.proc_to_leg[self.sig_labels[0]]+self.num_to_str(self.sig_scaler), weights=sig_w_true*(self.sig_scaler), histtype='step', color=self.sig_colour)
+            #axes.hist(sig_scores, bins=bins, label=self.proc_to_leg[self.sig_labels[0]]+r"$\times 10^{7}$", weights=sig_w_true*(self.sig_scaler), histtype='step', color=self.sig_colour)
 
         #data - need to take test frac of data
         data_binned, bin_edges = np.histogram(data_pred_test, bins=bins)
@@ -344,12 +388,12 @@ class Plotter(object):
             bkg_std_up_ratio   = np.ones_like(bkg_std_up)   + ((bkg_std_up - bkg_stack_summed)/bkg_stack_summed)
             ratio.fill_between(bins, list(bkg_std_down_ratio)+[bkg_std_down_ratio[-1]], list(bkg_std_up_ratio)+[bkg_std_up_ratio[-1]], alpha=0.3, step="post", color="grey", lw=1, zorder=4)
 
-            ratio.set_xlabel('{} Score'.format(MVA), ha='right', x=1, size=14)
+            ratio.set_xlabel('VBF {} Score'.format(MVA), ha='right', x=1, size=14)
             ratio.set_ylim(0, 2)
             ratio.grid(True, linestyle='dotted')
             ratio.set_ylabel('Data/MC', size=14)
-        else: axes.set_xlabel('{} Score'.format(MVA), ha='right', x=1, size=14)
-        self.plot_cms_labels(axes)
+        else: axes.set_xlabel('VBF {} Score'.format(MVA), ha='right', x=1, size=14)
+        self.plot_cms_labels(axes,label='Work in progress')
 
         current_bottom, current_top = axes.get_ylim()
         if log: 

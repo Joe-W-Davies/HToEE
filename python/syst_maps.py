@@ -2,36 +2,35 @@
 syst_map  = {'jerUp'  : 
                       ['leadJetEn','leadJetPt', 'leadJetEta', 'leadJetPhi', 'leadJetQGL', #'leadJetMass',
                        'subleadJetEn', 'subleadJetPt','subleadJetEta', 'subleadJetPhi', 'subleadJetQGL', #'subleadJetMass', 
-                       #'subsubleadJetEn', 'subsubleadJetPt','subsubleadJetEta', 'subsubleadJetPhi', 'subsubleadJetQGL', #'subsubleadJetMass',  #NOTE: can remove this line for ggH MVA
+                       'subsubleadJetEn', 'subsubleadJetPt','subsubleadJetEta', 'subsubleadJetPhi', 'subsubleadJetQGL', #'subsubleadJetMass',  #NOTE: can remove this line for ggH MVA
                        'dijetMass', 'dijetAbsDEta', 'dijetDPhi', 'dijetMinDRJetEle', #'dijetPt', 
                        'dijetCentrality', 'dijetDieleAbsDPhiTrunc','dijetDieleAbsDEta', 
-                       'subleadJetDieleDEta', 'subleadJetDieleDPhi' ##FIXME ignore as incorrect treatment in the dumper'leadJetDieleDPhi','leadJetDieleDEta', 
-                       ], 
+                       'subleadJetDieleDEta', 'subleadJetDieleDPhi'
+                      ],
              'jerDown': 
                       ['leadJetEn','leadJetPt', 'leadJetEta', 'leadJetPhi', 'leadJetQGL', #'leadJetMass',
                        'subleadJetEn', 'subleadJetPt','subleadJetEta', 'subleadJetPhi', 'subleadJetQGL', #'subleadJetMass', 
-                       #'subsubleadJetEn', 'subsubleadJetPt','subsubleadJetEta', 'subsubleadJetPhi', 'subsubleadJetQGL', #'subsubleadJetMass',  #NOTE: can remove this line for ggH MVA
+                       'subsubleadJetEn', 'subsubleadJetPt','subsubleadJetEta', 'subsubleadJetPhi', 'subsubleadJetQGL', #'subsubleadJetMass',  #NOTE: can remove this line for ggH MVA
                        'dijetMass', 'dijetAbsDEta', 'dijetDPhi', 'dijetMinDRJetEle', #'dijetPt', 
                        'dijetCentrality', 'dijetDieleAbsDPhiTrunc','dijetDieleAbsDEta', 
-                       'subleadJetDieleDEta', 'subleadJetDieleDPhi' ##FIXME ignore as incorrect treatment in the dumper'leadJetDieleDPhi','leadJetDieleDEta', 
-                       ], 
+                       'subleadJetDieleDEta', 'subleadJetDieleDPhi'
+                      ],
              'jesTotalUp': 
                       ['leadJetEn','leadJetPt', 'leadJetEta', 'leadJetPhi', 'leadJetQGL', #'leadJetMass',
                        'subleadJetEn', 'subleadJetPt','subleadJetEta', 'subleadJetPhi', 'subleadJetQGL', #'subleadJetMass', 
-                       #'subsubleadJetEn', 'subsubleadJetPt','subsubleadJetEta', 'subsubleadJetPhi', 'subsubleadJetQGL', #'subsubleadJetMass',  #NOTE: can remove this line for ggH MVA
+                       'subsubleadJetEn', 'subsubleadJetPt','subsubleadJetEta', 'subsubleadJetPhi', 'subsubleadJetQGL', #'subsubleadJetMass',  #NOTE: can remove this line for ggH MVA
                        'dijetMass', 'dijetAbsDEta', 'dijetDPhi', 'dijetMinDRJetEle', #'dijetPt', 
                        'dijetCentrality', 'dijetDieleAbsDPhiTrunc','dijetDieleAbsDEta', 
-                       'subleadJetDieleDEta', 'subleadJetDieleDPhi' ##FIXME ignore as incorrect treatment in the dumper'leadJetDieleDPhi','leadJetDieleDEta', 
-                       ], 
+                       'subleadJetDieleDEta', 'subleadJetDieleDPhi'
+                      ],
              'jesTotalDown': 
                       ['leadJetEn','leadJetPt', 'leadJetEta', 'leadJetPhi', 'leadJetQGL', #'leadJetMass',
                        'subleadJetEn', 'subleadJetPt','subleadJetEta', 'subleadJetPhi', 'subleadJetQGL', #'subleadJetMass', 
-                       #'subsubleadJetEn', 'subsubleadJetPt','subsubleadJetEta', 'subsubleadJetPhi', 'subsubleadJetQGL', #'subsubleadJetMass',  #NOTE: can remove this line for ggH MVA
-                       'dijetMass','dijetAbsDEta', 'dijetDPhi', 'dijetMinDRJetEle', #'dijetPt', 
+                       'subsubleadJetEn', 'subsubleadJetPt','subsubleadJetEta', 'subsubleadJetPhi', 'subsubleadJetQGL', #'subsubleadJetMass',  #NOTE: can remove this line for ggH MVA
+                       'dijetMass', 'dijetAbsDEta', 'dijetDPhi', 'dijetMinDRJetEle', #'dijetPt', 
                        'dijetCentrality', 'dijetDieleAbsDPhiTrunc','dijetDieleAbsDEta', 
-                       'subleadJetDieleDEta', 'subleadJetDieleDPhi' ##FIXME ignore as incorrect treatment in the dumper'leadJetDieleDPhi','leadJetDieleDEta', 
+                       'subleadJetDieleDEta', 'subleadJetDieleDPhi'
                       ],
-
              'EELowR9ElPtScaleUp': 
                       ['dielectronMass', 
                        'leadElectronEta', 'leadElectronPt','subleadElectronPt',#'leadElectronEn', 'leadElectronPt','leadElectronPhi', #'leadElectronMass', 
@@ -39,88 +38,72 @@ syst_map  = {'jerUp'  :
                        #'subleadElectronEn', 'subleadElectronMass', 'subleadElectronPt', #never use these
                        #'subsubleadElectronEn', 'subsubleadElectronMass', 'subsubleadElectronPt', #never use these
                        'leadElectronPtOvM', 'subleadElectronPtOvM', 'dielectronPt',
-                       'dielectronCosPhi', 'dijetMinDRJetEle', 'dijetCentrality', 'dijetDieleAbsDPhiTrunc',
-                       'dijetDieleAbsDEta', 'leadJetDieleDPhi', 'leadJetDieleDEta', 'subleadJetDieleDPhi',
-                       'subleadJetDieleDEta',
-                       #'dielectronMass', 'leadElectronPtOvM', 'subleadElectronPtOvM', 'leadElectronPt', 'subleadElectronPt' #just include these is making mass plots (for memory)
+                       'dielectronCosPhi',
                       ],
              'EELowR9ElPtScaleDown': 
                       ['dielectronMass', 
                        'leadElectronEta', 'leadElectronPt','subleadElectronPt',#'leadElectronEn', 'leadElectronPt','leadElectronPhi', #'leadElectronMass', 
+                       #'subleadElectronEta', 'subleadElectronPt',#'subleadElectronPhi', #do we use phi?
                        #'subleadElectronEn', 'subleadElectronMass', 'subleadElectronPt', #never use these
                        #'subsubleadElectronEn', 'subsubleadElectronMass', 'subsubleadElectronPt', #never use these
                        'leadElectronPtOvM', 'subleadElectronPtOvM', 'dielectronPt',
-                       'dielectronCosPhi', 'dijetMinDRJetEle', 'dijetCentrality', 'dijetDieleAbsDPhiTrunc',
-                       'dijetDieleAbsDEta', 'leadJetDieleDPhi', 'leadJetDieleDEta', 'subleadJetDieleDPhi',
-                       'subleadJetDieleDEta',
-                       #'dielectronMass', 'leadElectronPtOvM', 'subleadElectronPtOvM', 'leadElectronPt', 'subleadElectronPt' #just include these is making mass plots (for memory)
+                       'dielectronCosPhi',
                       ],
              'EEHighR9ElPtScaleUp': 
                       ['dielectronMass', 
                        'leadElectronEta', 'leadElectronPt','subleadElectronPt',#'leadElectronEn', 'leadElectronPt','leadElectronPhi', #'leadElectronMass', 
                        #'subleadElectronEta', 'subleadElectronPt',#'subleadElectronPhi', #do we use phi?
                        #'subleadElectronEn', 'subleadElectronMass', 'subleadElectronPt', #never use these
+                       #'subsubleadElectronEn', 'subsubleadElectronMass', 'subsubleadElectronPt', #never use these
                        'leadElectronPtOvM', 'subleadElectronPtOvM', 'dielectronPt',
-                       'dielectronCosPhi', 'dijetMinDRJetEle', 'dijetCentrality', 'dijetDieleAbsDPhiTrunc',
-                       'dijetDieleAbsDEta', 'leadJetDieleDPhi', 'leadJetDieleDEta', 'subleadJetDieleDPhi',
-                       'subleadJetDieleDEta',
-                       #'dielectronMass', 'leadElectronPtOvM', 'subleadElectronPtOvM', 'leadElectronPt', 'subleadElectronPt' #just include these is making mass plots (for memory)
+                       'dielectronCosPhi',
                       ],
              'EEHighR9ElPtScaleDown': 
                       ['dielectronMass', 
                        'leadElectronEta', 'leadElectronPt','subleadElectronPt',#'leadElectronEn', 'leadElectronPt','leadElectronPhi', #'leadElectronMass', 
                        #'subleadElectronEta', 'subleadElectronPt',#'subleadElectronPhi', #do we use phi?
                        #'subleadElectronEn', 'subleadElectronMass', 'subleadElectronPt', #never use these
+                       #'subsubleadElectronEn', 'subsubleadElectronMass', 'subsubleadElectronPt', #never use these
                        'leadElectronPtOvM', 'subleadElectronPtOvM', 'dielectronPt',
-                       'dielectronCosPhi', 'dijetMinDRJetEle', 'dijetCentrality', 'dijetDieleAbsDPhiTrunc',
-                       'dijetDieleAbsDEta', 'leadJetDieleDPhi', 'leadJetDieleDEta', 'subleadJetDieleDPhi',
-                       'subleadJetDieleDEta',
-                       #'dielectronMass', 'leadElectronPtOvM', 'subleadElectronPtOvM', 'leadElectronPt', 'subleadElectronPt' #just include these is making mass plots (for memory)
+                       'dielectronCosPhi',
                       ],
              'EBLowR9ElPtScaleUp': 
                       ['dielectronMass', 
                        'leadElectronEta', 'leadElectronPt','subleadElectronPt',#'leadElectronEn', 'leadElectronPt','leadElectronPhi', #'leadElectronMass', 
                        #'subleadElectronEta', 'subleadElectronPt',#'subleadElectronPhi', #do we use phi?
                        #'subleadElectronEn', 'subleadElectronMass', 'subleadElectronPt', #never use these
+                       #'subsubleadElectronEn', 'subsubleadElectronMass', 'subsubleadElectronPt', #never use these
                        'leadElectronPtOvM', 'subleadElectronPtOvM', 'dielectronPt',
-                       'dielectronCosPhi', 'dijetMinDRJetEle', 'dijetCentrality', 'dijetDieleAbsDPhiTrunc',
-                       'dijetDieleAbsDEta', 'leadJetDieleDPhi', 'leadJetDieleDEta', 'subleadJetDieleDPhi',
-                       'subleadJetDieleDEta',
-                       #'dielectronMass', 'leadElectronPtOvM', 'subleadElectronPtOvM', 'leadElectronPt', 'subleadElectronPt' #just include these is making mass plots (for memory)
+                       'dielectronCosPhi',
                       ],
              'EBLowR9ElPtScaleDown': 
                       ['dielectronMass', 
                        'leadElectronEta', 'leadElectronPt','subleadElectronPt',#'leadElectronEn', 'leadElectronPt','leadElectronPhi', #'leadElectronMass', 
                        #'subleadElectronEta', 'subleadElectronPt',#'subleadElectronPhi', #do we use phi?
                        #'subleadElectronEn', 'subleadElectronMass', 'subleadElectronPt', #never use these
+                       #'subsubleadElectronEn', 'subsubleadElectronMass', 'subsubleadElectronPt', #never use these
                        'leadElectronPtOvM', 'subleadElectronPtOvM', 'dielectronPt',
-                       'dielectronCosPhi', 'dijetMinDRJetEle', 'dijetCentrality', 'dijetDieleAbsDPhiTrunc',
-                       'dijetDieleAbsDEta', 'leadJetDieleDPhi', 'leadJetDieleDEta', 'subleadJetDieleDPhi',
-                       'subleadJetDieleDEta',
-                       #'dielectronMass', 'leadElectronPtOvM', 'subleadElectronPtOvM', 'leadElectronPt', 'subleadElectronPt' #just include these is making mass plots (for memory)
+                       'dielectronCosPhi',
                       ],
              'EBHighR9ElPtScaleUp': 
                       ['dielectronMass', 
                        'leadElectronEta', 'leadElectronPt','subleadElectronPt',#'leadElectronEn', 'leadElectronPt','leadElectronPhi', #'leadElectronMass', 
                        #'subleadElectronEta', 'subleadElectronPt',#'subleadElectronPhi', #do we use phi?
                        #'subleadElectronEn', 'subleadElectronMass', 'subleadElectronPt', #never use these
+                       #'subsubleadElectronEn', 'subsubleadElectronMass', 'subsubleadElectronPt', #never use these
                        'leadElectronPtOvM', 'subleadElectronPtOvM', 'dielectronPt',
-                       'dielectronCosPhi', 'dijetMinDRJetEle', 'dijetCentrality', 'dijetDieleAbsDPhiTrunc',
-                       'dijetDieleAbsDEta', 'leadJetDieleDPhi', 'leadJetDieleDEta', 'subleadJetDieleDPhi',
-                       'subleadJetDieleDEta',
-                       #'dielectronMass', 'leadElectronPtOvM', 'subleadElectronPtOvM', 'leadElectronPt', 'subleadElectronPt' #just include these is making mass plots (for memory)
+                       'dielectronCosPhi',
                       ],
              'EBHighR9ElPtScaleDown': 
                       ['dielectronMass', 
                        'leadElectronEta', 'leadElectronPt','subleadElectronPt',#'leadElectronEn', 'leadElectronPt','leadElectronPhi', #'leadElectronMass', 
                        #'subleadElectronEta', 'subleadElectronPt',#'subleadElectronPhi', #do we use phi?
                        #'subleadElectronEn', 'subleadElectronMass', 'subleadElectronPt', #never use these
+                       #'subsubleadElectronEn', 'subsubleadElectronMass', 'subsubleadElectronPt', #never use these
                        'leadElectronPtOvM', 'subleadElectronPtOvM', 'dielectronPt',
-                       'dielectronCosPhi', 'dijetMinDRJetEle', 'dijetCentrality', 'dijetDieleAbsDPhiTrunc',
-                       'dijetDieleAbsDEta', 'leadJetDieleDPhi', 'leadJetDieleDEta', 'subleadJetDieleDPhi',
-                       'subleadJetDieleDEta',
-                       #'dielectronMass', 'leadElectronPtOvM', 'subleadElectronPtOvM', 'leadElectronPt', 'subleadElectronPt' #just include these is making mass plots (for memory)
+                       'dielectronCosPhi',
                       ],
+
              'NonLinearityUp': 
                       ['dielectronMass', 
                        'leadElectronEta', 'leadElectronPt','subleadElectronPt',#'leadElectronEn', 'leadElectronPt','leadElectronPhi', #'leadElectronMass', 

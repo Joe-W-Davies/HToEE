@@ -43,7 +43,7 @@ To use an LSTM neural network to perform separate VBF/ggH signal from background
 The training can be run with the same syntax used in the BDT training. For example, to train a simple LSTM with default architecture and equalised class weights:
 
 ```
-python training/train_lstm.py -c configs/lstm_config_ggh.yaml -t 0.7 -w
+python training/train_lstm.py -c configs/lstm_config_ggh.yaml -t 0.7 -w -B
 ```
 
 To optimise network hyper paramters, add the `-o` option. Following the optimisation, if all jobs have finished, add `-b` to train with the best model and produce ROC plots for the classifier.
@@ -100,3 +100,5 @@ Some other important notes:
 * this script and all the systematics variations should be run once per year, such that the signal models can be split at the fit stage
 * if the memory gets too high, you could to modify DataHandling.py such that we dont read every systematic in every time, since the script is only run once per systematic
 * the output trees need to be hadded over procs for each year e.g. for 2016 ggH: `hadd ggH_Hee_2016.root output_trees/2016/ggh_125_13TeV_*`
+* at some point you could prevent bkg MC samples being saved for each mass point separately. In this context, its just copying the same file for MH value.
+* Change output score plot such that is shows both the train+test sets, and ALL data!

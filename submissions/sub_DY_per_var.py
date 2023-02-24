@@ -28,8 +28,15 @@ def main(options):
              #for electron+jet vars and output score
              #sub_command =  'python plotting/DY_validation.py -c configs/dy_valid_config_{}.yaml -M configs/mva_boundaries_config.yaml -s jesTotal jer ElPtScale ElectronIDSF TriggerSF -v {} -r'.format(options.proc.lower(),var)
 
-             #sub_command =  'python plotting/DY_validation.py -c configs/dy_valid_config_{}.yaml -M configs/mva_boundaries_config.yaml -s EELowR9ElPtScale EBLowR9ElPtScale EEHighR9ElPtScale EBHighR9ElPtScale jesTotal -v {} -r'.format(options.proc.lower(),var) #ggH
-             sub_command =  'python plotting/DY_validation.py -c configs/dy_valid_config_{}.yaml -M configs/mva_boundaries_config.yaml -s jesTotal jer -v {}'.format(options.proc.lower(),var) #VBF
+             #sub_command =  'python plotting/DY_validation.py -c configs/dy_valid_config_{}.yaml -M configs/mva_boundaries_config.yaml -s EELowR9ElPtScale EBLowR9ElPtScale EEHighR9ElPtScale EBHighR9ElPtScale jesTotal ElectronRecoSF ElectronIDSF TriggerSF L1PreFiringWeight -v {} -r'.format(options.proc.lower(),var) #ggH ###works but with reduced Mee range
+             #sub_command =  'python plotting/DY_validation.py -c configs/dy_valid_config_{}.yaml -M configs/mva_boundaries_config.yaml -s EELowR9ElPtScale EBLowR9ElPtScale EEHighR9ElPtScale EBHighR9ElPtScale jesTotal -v {} -r'.format(options.proc.lower(),var) #ggH - factor all weight systs into plotting
+
+             #THESIS
+             #sub_command =  'python plotting/DY_validation.py -c configs/dy_valid_config_{}.yaml -M configs/mva_boundaries_config.yaml -s EELowR9ElPtScale EBLowR9ElPtScale EEHighR9ElPtScale EBHighR9ElPtScale jesTotal ElectronIDSF TriggerSF -v {} -r'.format(options.proc.lower(),var) #ggH - factor all weight systs into plotting
+
+
+             #PAPER:
+             sub_command =  'python plotting/DY_validation.py -c configs/dy_valid_config_{}.yaml -M configs/mva_boundaries_config.yaml -s jesTotal jer ElectronIDSF TriggerSF -v {}'.format(options.proc.lower(),var) #VBF
 
              with open('./submissions/sub_DY_single_vars.sh') as f_template:
                  with open(sub_file_name,'w') as f_sub:

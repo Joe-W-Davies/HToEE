@@ -76,11 +76,16 @@ def main(options):
             if cat_counter==0: extra_cuts = options.mva_proc+'_mva >' + str(boundaries['tag_0'])
             else: extra_cuts = (options.mva_proc+'_mva <' + str(boundaries['tag_'+str(cat_counter-1)])) + ' and ' + (options.mva_proc+'_mva >' + str(boundaries['tag_'+str(cat_counter)]))
             #plotter.plot_input(options.mass_var_name, options.n_bins, output_tag, options.ratio_plot, norm_to_data=True, extra_cuts=extra_cuts, extra_tag=cat_counter, blind=True)
-            fig,axes,ratio = plotter.plot_input(options.mass_var_name, options.n_bins, output_tag, options.ratio_plot, norm_to_data=True, extra_cuts=extra_cuts, extra_tag=cat_counter, blind=False, return_props=True)
+            #fig,axes,ratio = plotter.plot_input(options.mass_var_name, options.n_bins, output_tag, options.ratio_plot, norm_to_data=True, extra_cuts=extra_cuts, extra_tag=cat_counter, blind=False, return_props=True)
+            if options.ratio_plot:
+                fig,axes,ratio = plotter.plot_input(options.mass_var_name, options.n_bins, output_tag, options.ratio_plot, norm_to_data=False, extra_cuts=extra_cuts, extra_tag=cat_counter, blind=False, return_props=True)
+                ratio.set_ylim(0, 2)
+            else:
+                fig,axes = plotter.plot_input(options.mass_var_name, options.n_bins, output_tag, options.ratio_plot, norm_to_data=False, extra_cuts=extra_cuts, extra_tag=cat_counter, blind=False, return_props=True)
             #axes.text(0.04, 0.93, '{} \n category {} '.format(options.mva_proc,cat_counter), ha='left', va='top', transform=axes.transAxes, size=10)
             axes.text(0.1, 0.895, '{} \n category {} '.format(options.mva_proc,cat_counter), ha='center', va='center', transform=axes.transAxes, size=10)
-            axes.set_ylim(0, 140) #VBF cat 0
-            ratio.set_ylim(0, 2)
+            #axes.set_ylim(0, 140) #VBF cat 0
+            axes.set_ylabel('Events ' , size=14, ha='right', y=1)
             fig.savefig('{0}/plotting/plots/{1}/{1}_{2}_cat{3}.pdf'.format(os.getcwd(), output_tag, options.mass_var_name, cat_counter))
             cat_counter += 1
 

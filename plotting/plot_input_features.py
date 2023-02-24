@@ -26,8 +26,8 @@ def main(options):
 
         proc_to_tree_name = config['proc_to_tree_name']
 
-        sig_colour        = 'forestgreen'
-        #sig_colour        = 'red'
+        #sig_colour        = 'forestgreen'
+        sig_colour        = 'red'
  
                                            #Data handling stuff#
         #load the mc dataframe for all years
@@ -53,9 +53,11 @@ def main(options):
  
         #set up X, w and y, train-test 
         #plotter = Plotter(root_obj, train_vars, sig_col=sig_colour, norm_to_data=False)
-        for var in train_vars:
+        #for var in train_vars:
+        for var in ['dielectronPt','subsubleadJetEn']:
             plotter = Plotter(root_obj, train_vars, sig_col=sig_colour, norm_to_data=True)
-            plotter.plot_input(var, options.n_bins, output_tag, options.ratio_plot, norm_to_data=True, merge_bkg_procs={'ttbarTotal':['TT2L2Nu','TTSemiL']})
+            #plotter.plot_input(var, options.n_bins, output_tag, options.ratio_plot, norm_to_data=True, merge_bkg_procs={'ttbarTotal':['TT2L2Nu','TTSemiL']})
+            plotter.plot_input(var, options.n_bins, output_tag, options.ratio_plot, norm_to_data=True)
 
 if __name__ == "__main__":
 

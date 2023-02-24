@@ -11,7 +11,10 @@ nominal_vars = ['weight', 'centralObjectWeight', 'leadElectronPtOvM', 'subleadEl
                 'dijetMinDRJetEle', 'dijetCentrality', 'dielectronSigmaMoM', 'dijetDPhi', #'dijetPt',
                 'leadJetDieleDPhi', 'leadJetDieleDEta', 'subleadJetDieleDPhi', 'subleadJetDieleDEta',
                 'leadElectronCharge', 'subleadElectronCharge', 
+
+                #for corrections
                 #'leadElectronPhi','leadElectronMass','subleadElectronPhi','subleadElectronMass'
+
 #               'TriggerSF'
                 #'nSoftJets','metSumET','metPhi','metPt' , 'leadJetBTagScore', 'subleadJetBTagScore', 'subsubleadJetBTagScore',
                 #'leadJetPUJID','subleadJetPUJID', 'subsubleadJetPUJID'#,'leadJetID','subleadJetID','subsubleadJetID'

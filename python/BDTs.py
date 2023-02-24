@@ -521,12 +521,12 @@ class BDTHelpers(object):
         sig_y_pred_test  = self.y_pred_test[self.y_test==1]
         sig_weights_test = self.test_weights[self.y_test==1]
         sig_y_true_test  = self.y_test[self.y_test==1]
-        data_weights_test = np.ones(self.X_data_test.values.shape[0])
-        data_y_true_test  = np.zeros(self.X_data_test.values.shape[0])
-        data_y_pred_test  = self.clf.predict_proba(self.X_data_test.values)[:,1:]
-        print ('Area under ROC curve with data as bkg is: {:.4f}'.format(roc_auc_score( np.concatenate((sig_y_true_test, data_y_true_test), axis=None),
-                                                                                       np.concatenate((sig_y_pred_test, data_y_pred_test), axis=None),
-                                                                                       sample_weight=np.concatenate((sig_weights_test, data_weights_test), axis=None) 
+        self.data_weights_test = np.ones(self.X_data_test.values.shape[0])
+        self.data_y_true_test  = np.zeros(self.X_data_test.values.shape[0])
+        self.data_y_pred_test  = self.clf.predict_proba(self.X_data_test.values)[:,1:]
+        print ('Area under ROC curve with data as bkg is: {:.4f}'.format(roc_auc_score( np.concatenate((sig_y_true_test, self.data_y_true_test), axis=None),
+                                                                                       np.concatenate((sig_y_pred_test, self.data_y_pred_test), axis=None),
+                                                                                       sample_weight=np.concatenate((sig_weights_test, self.data_weights_test), axis=None) 
                                                                                      )
                                                                         ))
 
@@ -587,7 +587,7 @@ class BDTHelpers(object):
         print('saving: {0}/plotting/plots/{1}/{1}_ROC_curve.pdf'.format(os.getcwd(),out_tag))
         plt.close()
 
-    def plot_output_score(self, out_tag, ratio_plot=False, norm_to_data=False, log=False,merge_bkg_procs={}):
+    def plot_output_score(self, out_tag, ratio_plot=False, norm_to_data=False, log=False, merge_bkg_procs={}, split_signal_procs=False):
         """
         Plot the output score for the classifier, for signal, background, and data
 
@@ -603,7 +603,8 @@ class BDTHelpers(object):
 
         output_score_fig = self.plotter.plot_output_score(self.y_test, self.y_pred_test, self.test_weights, 
                                                           self.proc_arr_test, self.clf.predict_proba(self.X_data_test.values)[:,1:],
-                                                          ratio_plot=ratio_plot, norm_to_data=norm_to_data, log=log, merge_bkg_procs=merge_bkg_procs)
+                                                          ratio_plot=ratio_plot, norm_to_data=norm_to_data, log=log, merge_bkg_procs=merge_bkg_procs,
+                                                          split_signal_procs=split_signal_procs)
 
         Utils.check_dir('{}/plotting/plots/{}'.format(os.getcwd(),out_tag))
         output_score_fig.savefig('{0}/plotting/plots/{1}/{1}_output_score.pdf'.format(os.getcwd(), out_tag))

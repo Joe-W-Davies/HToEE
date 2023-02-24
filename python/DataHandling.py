@@ -72,7 +72,7 @@ class ROOTHelpers(object):
     :type read_systs: bool
     """
 
-    def __init__(self, out_tag, mc_dir, mc_fnames, data_dir, data_fnames, proc_to_tree_name, train_vars, vars_to_add, presel_str='', read_systs=False, mH=125):
+    def __init__(self, out_tag, mc_dir, mc_fnames, data_dir, data_fnames, proc_to_tree_name, train_vars, vars_to_add, presel_str='', read_systs=False, mH='125'):
 
         self.years              = set()
         #self.lumi_map           = {'2016':35.9, '2017':41.5, '2018':59.7}
@@ -199,10 +199,19 @@ class ROOTHelpers(object):
             e_2.SetPtEtaPhiM(row['shiftedSubleadElectronPt'], row['subleadElectronEta'], row['subleadElectronPhi'], row['subleadElectronMass'])
             return (e_1 + e_2).M()
 
-        self.data_df['shiftedLeadElectronPt']    = self.data_df['leadElectronPt']*sf
-        self.data_df['shiftedSubleadElectronPt'] = self.data_df['subleadElectronPt']*sf
-        self.data_df['dielectronMass']           = self.data_df.apply(calc_dielectron_mass, axis=1)
+        def calc_dielectron_pt(row):
+        #get position vector of negative e in rest frame of ee system
+            e_1 = TLorentzVector()
+            e_1.SetPtEtaPhiM(row['shiftedLeadElectronPt'], row['leadElectronEta'], row['leadElectronPhi'], row['leadElectronMass'])
+            e_2 = TLorentzVector()
+            e_2.SetPtEtaPhiM(row['shiftedSubleadElectronPt'], row['subleadElectronEta'], row['subleadElectronPhi'], row['subleadElectronMass'])
+            return (e_1 + e_2).Pt()
 
+        if len(self.years)==1 and ('2016A' in self.years):
+            self.data_df['shiftedLeadElectronPt']    = self.data_df['leadElectronPt']*sf
+            self.data_df['shiftedSubleadElectronPt'] = self.data_df['subleadElectronPt']*sf
+            self.data_df['dielectronMass']           = self.data_df.apply(calc_dielectron_mass, axis=1)
+            self.data_df['dielectronPt']           = self.data_df.apply(calc_dielectron_pt, axis=1)
             
 
     def encode_year(self):
@@ -277,7 +286,7 @@ class ROOTHelpers(object):
 
         try: 
             if reload_samples: raise IOError
-            elif not bkg: self.mc_df_sig.append( self.load_df(self.mc_dir+'DataFrames/', sample_obj.proc_tag, sample_obj.year) )
+            elif not bkg: self.mc_df_sig.append( self.load_df(self.mc_dir+'DataFrames/', sample_obj.proc_tag, sample_obj.year) ) #FIXME add sig,bkg,data flag in load_Df args here to only save/read M125 samples for signal. at it does sig and bkg
             else: self.mc_df_bkg.append( self.load_df(self.mc_dir+'DataFrames/', sample_obj.proc_tag, sample_obj.year) )
         except IOError: 
             if not bkg: self.mc_df_sig.append( self.root_to_df(self.mc_dir, 
@@ -341,7 +350,7 @@ class ROOTHelpers(object):
             df = pd.read_csv('{}{}_M{}_{}_df_{}.csv'.format(df_dir, proc, self.MH, self.out_tag, year))
             missing_vars = [x for x in self.train_vars if x not in list(df.columns)+list(self.vars_to_add.keys())]
             if len(missing_vars)!=0: raise IOError('Missing variables in dataframe: {}. Reload with option -r and try again'.format(missing_vars)) #will actually catch this error but still exits later on
-            else: print('Sucessfully loaded DataFrame: {}{}_M125_{}_df_{}.csv'.format(df_dir, proc, self.MH, self.out_tag, year))
+            else: print('Sucessfully loaded DataFrame: {}{}_M{}_{}_df_{}.csv'.format(df_dir, proc, self.MH, self.out_tag, year))
         else: 
             df = pd.read_csv('{}{}_{}_df_{}.csv'.format(df_dir, proc, self.out_tag, year))
             missing_vars = [x for x in self.train_vars if x not in list(df.columns)+list(self.vars_to_add.keys())]
@@ -380,6 +389,7 @@ class ROOTHelpers(object):
 
         if flag == 'Data':
             #can cut on data here as dont need to run MC_norm
+            if 'pt_weight' in vars_to_read: vars_to_read = vars_to_read.remove('pt_weight')
             df = df_tree.pandas.df(vars_to_read).query(self.cut_string)
         else:
             #cannot cut on sim now as need to run MC_norm and need sumGenW before selection!
@@ -707,14 +717,14 @@ class ROOTHelpers(object):
         if not ignore_sig:
             for sig_proc in self.sig_procs:
                 sig_df = self.mc_df_sig[np.logical_and(self.mc_df_sig.proc==sig_proc, self.mc_df_sig.year==year)]
-                sig_df.to_csv('{}/{}_{}_df_{}.csv'.format(self.mc_dir+'DataFrames', sig_proc, self.out_tag, year))
-                print('saved dataframe: {}/{}_{}_df_{}.csv'.format(self.mc_dir+'DataFrames', sig_proc, self.out_tag, year))
+                sig_df.to_csv('{}/{}_M{}_{}_df_{}.csv'.format(self.mc_dir+'DataFrames', sig_proc, self.MH, self.out_tag, year))
+                print('saved dataframe: {}/{}_M{}_{}_df_{}.csv'.format(self.mc_dir+'DataFrames', sig_proc, self.MH, self.out_tag, year))
 
         if not ignore_bkg:
             for bkg_proc in self.bkg_procs:
                 bkg_df = self.mc_df_bkg[np.logical_and(self.mc_df_bkg.proc==bkg_proc,self.mc_df_bkg.year==year)]
-                bkg_df.to_csv('{}/{}_{}_df_{}.csv'.format(self.mc_dir+'DataFrames', bkg_proc, self.out_tag, year))
-                print('saved dataframe: {}/{}_{}_df_{}.csv'.format(self.mc_dir+'DataFrames', bkg_proc, self.out_tag, year))
+                bkg_df.to_csv('{}/{}_M{}_{}_df_{}.csv'.format(self.mc_dir+'DataFrames', bkg_proc, self.MH, self.out_tag, year)) #FIXME no need for MH here but will need to change it in original saver too!
+                print('saved dataframe: {}/{}_M{}_{}_df_{}.csv'.format(self.mc_dir+'DataFrames', bkg_proc, self.MH, self.out_tag, year)) #FIXME no need for MH here but will need to change it in original saver too!
 
         if not ignore_data:
             data_df = self.data_df[self.data_df.year==str(year)]

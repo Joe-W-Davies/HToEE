@@ -65,7 +65,9 @@ vars_to_add:
 # "baseline" selection that will be applied to all samples. None of these variables should be inputs!
 preselection: #NOTE: dont include upper bounds in this string! and keep the lower bounds loose
     #'dielectronMass > 80 and dielectronMass < 100 and leadElectronPtOvM>0.3 and subleadElectronPtOvM>0.2 and leadElectronPt>30 and subleadElectronPt>20 and dijetMass>200 and leadJetPt>30 and subleadJetPt>20'
-    'dielectronMass > 77 and dijetMass>200'
+    #
+    'dielectronMass > 77 and dijetMass>200' 
+    #'dijetMass>0'
 
 cut_map:
     #dielectronMass: ['>85','<95']

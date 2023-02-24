@@ -25,11 +25,11 @@ def annotate_and_save(axes, plotter, var):
     axes.set_ylim(bottom=0, top=current_top*1.3)
     #axes.legend(bbox_to_anchor=(0.97,0.97), ncol=2)
     axes.legend(loc='upper center', bbox_to_anchor=(0.5,0.97), ncol=2)
-    plotter.plot_cms_labels(axes)
+    plotter.plot_cms_labels(axes, lumi='',label='Work in progress')
 
     var_name_safe = var.replace('_',' ')
     axes.set_xlim(left=plotter.var_to_xrange[var][0], right=plotter.var_to_xrange[var][1])
-    axes.set_xlabel('{}'.format(var_name_safe), ha='right', x=1, size=13)
+    axes.set_xlabel(plotter.var_to_xstring[var], ha='right', x=1, size=13)
 
 def main(options):
 
@@ -106,7 +106,8 @@ def main(options):
         Utils.check_dir('{}/plotting/plots/{}_sig_bkg_evo'.format(os.getcwd(), output_tag))
         i_hist = 0
 
-        for var in train_vars+['dielectronMass']:
+        #for var in train_vars+['dielectronMass']:
+        for var in ['dijetAbsDEta','dijetMass','leadJetQGL']:
             fig  = plt.figure(1)
             axes = fig.gca()
             var_bins = np.linspace(plotter.var_to_xrange[var][0], plotter.var_to_xrange[var][1], options.n_bins)
@@ -118,7 +119,7 @@ def main(options):
                 i_hist += 1
             i_hist=0
             annotate_and_save(axes, plotter, var)
-            axes.text(0.95, 0.6, 'Simulated VBF signal', ha='right', va='bottom', transform=axes.transAxes, size=14)
+            #axes.text(0.95, 0.6, 'Simulated VBF signal', ha='right', va='bottom', transform=axes.transAxes, size=14)
             fig.savefig('{0}/plotting/plots/{1}_sig_bkg_evo/{1}_{2}.pdf'.format(os.getcwd(), output_tag, var))
             plt.close()
 
@@ -148,10 +149,10 @@ if __name__ == "__main__":
     required_args.add_argument('-c','--config', action='store', required=True)
     required_args.add_argument('-a','--model_architecture', action='store', required=True)
     required_args.add_argument('-m','--model', action='store', required=True)
-    required_args.add_argument('-B','--boundaries', nargs='+', required=True, default=[0.3,0.5,0.7,1.0], type=float)
     opt_args = parser.add_argument_group('Optional Arguements')
+    opt_args.add_argument('-B','--boundaries', nargs='+', required=False, default=[0.3,0.5,0.7,1.0], type=float)
     opt_args.add_argument('-r','--reload_samples', action='store_true', default=False)
     opt_args.add_argument('-P','--pt_reweight', action='store_true',default=False)
-    opt_args.add_argument('-b','--n_bins',  default=26, type=int)
+    opt_args.add_argument('-b','--n_bins',  default=34, type=int)
     options=parser.parse_args()
     main(options)

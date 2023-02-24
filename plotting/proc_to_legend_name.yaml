@@ -1,9 +1,23 @@
 proc_to_leg_name:
-    'DYMC'      : 'DY ($Z\rightarrow \mathrm{ee}$)'
-    'VBF'       : 'VBF'
-    'ggH'       : 'ggH'
-    "Data"      : 'Data'
-    "TT2L2Nu"   : '$t\bar{t}\rightarrow 2\ell2\nu$'
-    "TTSemiL"   : '$t\bar{t}\rightarrow$ semi-leptonic'
-    "ttbarTotal": '$t\bar{t}$'
-    "EWKZ"      : 'EW $Z$'
+    'DYMC'        : 'DY ($Z\rightarrow \mathrm{e^{+}e^{-}}$)'
+    'VBF'         : 'VBF ($\mathrm{H}\rightarrow\mathrm{e^{+}e^{-}})$'
+    'ggH'         : 'ggH ($\mathrm{H}\rightarrow\mathrm{e^{+}e^{-}})$'
+    "Data"        : 'Data'
+    "TT2L2Nu"     : '$t\bar{t}\rightarrow 2\ell2\nu$'
+    "TTSemiL"     : '$t\bar{t}\rightarrow$ semi-leptonic'
+    "ttbarTotal"  : '$\mathrm{t}\bar{\mathrm{t}}$'
+    "EWKZ"        : '$\mathrm{EW}$ $Z\rightarrow\mathrm{e^{+}e^{-}}$'
+    "EWKZlowmass" : ''
+
+#old
+#proc_to_leg_name:
+#    'DYMC'        : 'DY ($Z\rightarrow \mathrm{ee}$)'
+#    'VBF'         : 'VBF ($\mathrm{H}\rightarrow\mathrm{ee})$'
+#    'ggH'         : 'ggH ($\mathrm{H}\rightarrow\mathrm{ee})$'
+#    "Data"        : 'Data'
+#    "TT2L2Nu"     : '$t\bar{t}\rightarrow 2\ell2\nu$'
+#    "TTSemiL"     : '$t\bar{t}\rightarrow$ semi-leptonic'
+#    "ttbarTotal"  : '$\mathrm{t}\bar{\mathrm{t}}$'
+#    "EWKZ"        : '$\mathrm{EW}$ $Z\rightarrow\mathrm{ee}$'
+#    "EWKZlowmass" : ''
+

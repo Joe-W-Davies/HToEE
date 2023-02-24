@@ -289,7 +289,8 @@ class DYPlotter(object):
 
         #plot stack
         #axes[0].hist(stacked_var, bins=bins, label=stacked_leg, weights=stacked_w, color=stacked_colours, histtype='stepfilled',stacked=True)
-        axes[0].hist(np.concatenate(stacked_var), bins=bins, label=r'DY ($Z\rightarrow \mathrm{e^{+}e^{-}}$)', weights=np.concatenate(stacked_w), color='#CBCBE5', histtype='stepfilled')
+        #axes[0].hist(np.concatenate(stacked_var), bins=bins, label=r'DY ($Z\rightarrow \mathrm{e^{+}e^{-}}$)', weights=np.concatenate(stacked_w), color='#CBCBE5', histtype='stepfilled')
+        axes[0].hist(np.concatenate(stacked_var), bins=bins, label=r'$Z\rightarrow \mathrm{e^{+}e^{-}}$', weights=np.concatenate(stacked_w), color='#CBCBE5', histtype='stepfilled')
 
 
         self.mc_stat_unc          = [sumw_all_bkgs-stat_down_all_bkgs, stat_up_all_bkgs-sumw_all_bkgs]
@@ -320,6 +321,7 @@ class DYPlotter(object):
         for syst_name in systematics:
             if syst_name in weight_systs.keys(): syst_dfs = self.get_weight_syst(syst_name, cut_string, plot_var=variable, do_mva=do_mva)
             else: syst_dfs = self.relabel_syst_vars(syst_name, cut_string, plot_var=variable)
+            print '\n\n syst name: {}'.format(syst_name)
             print 'DEBUG: nominal vars '
             print self.root_obj.mc_df_bkg['dijetMass']
             print 'DEBUG: syst up vars '
@@ -331,8 +333,8 @@ class DYPlotter(object):
                 #syst_dfs[syst_type]['weight'] *= self.k_factor #FIXME check can remove the copy() #FIXME
                 if do_mva: syst_dfs[syst_type][self.proc+'_mva'] = self.eval_bdt(self.clf, syst_dfs[syst_type], self.root_obj.train_vars)
             syst_objects[syst_name] = Systematic(syst_name, down_frame=syst_dfs['Down'], up_frame=syst_dfs['Up'])
-            print 'DEBUG: for syst: {}, MVA up {}'.format(syst_name, syst_dfs['Up'][self.proc+'_mva'])
-            print 'DEBUG: for syst: {}, MVA down: {}'.format(syst_name, syst_dfs['Down'][self.proc+'_mva'])
+            #print 'DEBUG: for syst: {}, MVA up {}'.format(syst_name, syst_dfs['Up'][self.proc+'_mva'])
+            #print 'DEBUG: for syst: {}, MVA down: {}'.format(syst_name, syst_dfs['Down'][self.proc+'_mva'])
             #print 'DEBUG: for syst: {}, MVA up/down diff are equal: {} !!'.format(syst_name, np.array_equal(syst_dfs['Up'][self.proc+'_mva'],syst_dfs['Down'][self.proc+'_mva']))
             #print 'DEBUG: for syst: {}, leadJetEn up/down diff are equal: {} !!'.format(syst_name, np.array_equal(syst_dfs['Up']['leadJetEn'],syst_dfs['Down']['leadJetEn']))
             #if do_mva: print 'DEBUG: for syst: {}, leadPtOvM up/down diff are equal: {} !!'.format(syst_name, np.array_equal(syst_dfs['Up']['leadElectronPtOvM'],syst_dfs['Down']['leadElectronPtOvM']))
@@ -368,6 +370,8 @@ class DYPlotter(object):
                     else:
                         syst_obj.up_syst_binned[bkg_proc]   = [np.asarray(true_down_variations), 
                                                                np.asarray(true_up_variations)]
+
+                    print 'Syst {} {}, true down and up: {}'.format(syst_name, syst_type, [np.asarray(true_down_variations), np.asarray(true_up_variations)])
 
         #add all the up/down variations (separately) for each systematic in quadrature for each bin, 
         #for each proc 
@@ -470,7 +474,7 @@ class DYPlotter(object):
         #axes[1].legend(bbox_to_anchor=(0.99,0.99), ncol=1, prop={'size':9})
         ######################
         axes[1].set_ylabel('Data/MC', size=14)
-        axes[1].set_xlim(0,1)
+        #axes[1].set_xlim(0,1)
 
 
     def relabel_syst_vars(self, syst_name, cut_string, plot_var, syst_types=['Up','Down']):

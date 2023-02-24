@@ -9,12 +9,12 @@ declare -a systs=("jesTotalUp" "jesTotalDown" "jerUp" "jerDown" "EELowR9ElPtScal
 
 ##2016-A
 #usual systs
-for syst in "${systs[@]}"
-do
-    python categoryOpt/generic_tagger.py -c configs/OneTwenty/tag_seq_config_2016A.yaml -M configs/mva_boundaries_config.yaml -d -S "$syst" 
-done
+#for syst in "${systs[@]}"
+#do
+#    python categoryOpt/generic_tagger.py -c configs/OneTwenty/tag_seq_config_2016A.yaml -M configs/mva_boundaries_config.yaml -d -S "$syst" 
+#done
 #weight systs (plus nominal branches)
-python categoryOpt/generic_tagger.py -c configs/OneTwenty/tag_seq_config_2016A.yaml -M configs/mva_boundaries_config.yaml -d -W
+#python categoryOpt/generic_tagger.py -c configs/OneTwenty/tag_seq_config_2016A.yaml -M configs/mva_boundaries_config.yaml -d -W
 
 #2016-B
 #usual systs
@@ -32,7 +32,7 @@ python categoryOpt/generic_tagger.py -c configs/OneTwenty/tag_seq_config_2016A.y
 #    python categoryOpt/generic_tagger.py -c configs/OneTwenty/tag_seq_config_2017.yaml -M configs/mva_boundaries_config.yaml -d -S "$syst"
 #done
 #weight systs (plus nominal branches)
-#python categoryOpt/generic_tagger.py -c configs/OneTwenty/tag_seq_config_2017.yaml -M configs/mva_boundaries_config.yaml -d -W
+#python categoryOpt/generic_tagger.py -c configs/OneTwenty/tag_seq_config_2017.yaml -M configs/mva_boundaries_config.yaml -d -W -r
 
 ##2018
 ##usual systs

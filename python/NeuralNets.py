@@ -76,23 +76,23 @@ class LSTM_DNN(object):
         self.X_data_test_high_level  = None
         
         # high complex
-        #self.set_model(n_lstm_layers=3, n_lstm_nodes=150, n_dense_1=2, n_nodes_dense_1=300, 
+        #self.set_model(n_lstm_layers=3, n_lstm_nodes=150, n_dense_1=3, n_nodes_dense_1=300, 
         #               n_dense_2=3, n_nodes_dense_2=200, dropout_rate=0.3,
         #               learning_rate=0.001, batch_norm=True, batch_momentum=0.99)
 
         # med complex
-        self.set_model(n_lstm_layers=2, n_lstm_nodes=50, n_dense_1=2, n_nodes_dense_1=50, 
-                       n_dense_2=2, n_nodes_dense_2=20, dropout_rate=0.25,
-                       learning_rate=0.001, batch_norm=True, batch_momentum=0.99)
+        #self.set_model(n_lstm_layers=2, n_lstm_nodes=50, n_dense_1=2, n_nodes_dense_1=50, 
+        #               n_dense_2=2, n_nodes_dense_2=20, dropout_rate=0.25,
+        #               learning_rate=0.001, batch_norm=True, batch_momentum=0.99)
 
         #ggH model that learns the m_ee
         #self.set_model(n_lstm_layers=3, n_lstm_nodes=50, n_dense_1=3, n_nodes_dense_1=150, 
         #               n_dense_2=2, n_nodes_dense_2=100, dropout_rate=0.1,
         #               learning_rate=0.001, batch_norm=True, batch_momentum=0.99)
 
-        #self.set_model(n_lstm_layers=2, n_lstm_nodes=50, n_dense_1=2, n_nodes_dense_1=100, 
-        #               n_dense_2=1, n_nodes_dense_2=50, dropout_rate=0.25,
-        #               learning_rate=0.001, batch_norm=True, batch_momentum=0.99)
+        self.set_model(n_lstm_layers=2, n_lstm_nodes=50, n_dense_1=2, n_nodes_dense_1=100, 
+                       n_dense_2=1, n_nodes_dense_2=50, dropout_rate=0.25,
+                       learning_rate=0.001, batch_norm=True, batch_momentum=0.99)
 
 
         # simple
@@ -306,6 +306,14 @@ class LSTM_DNN(object):
             X_scaled_data_all_vars_test       = pd.DataFrame(X_scaled_data_all_vars_test, columns=self.low_level_vars_flat+self.high_level_vars)
             self.X_data_test_high_level       = X_scaled_data_all_vars_test[self.high_level_vars].values
             self.X_data_test_low_level        = X_scaled_data_all_vars_test[self.low_level_vars_flat].values
+
+            X_tot                             = self.data_obj.data_df[self.low_level_vars_flat+self.high_level_vars]
+            X_scaled_data_all_vars_tot        = self.X_scaler.transform(X_tot)
+            X_scaled_data_all_vars_tot        = pd.DataFrame(X_scaled_data_all_vars_tot, columns=self.low_level_vars_flat+self.high_level_vars)
+            self.X_data_tot_high_level        = X_scaled_data_all_vars_tot[self.high_level_vars].values
+            self.X_data_tot_low_level         = X_scaled_data_all_vars_tot[self.low_level_vars_flat].values
+
+
        
     def set_low_level_2D_test_train(self, do_data=False, ignore_train=False):
         """
@@ -325,6 +333,7 @@ class LSTM_DNN(object):
         if do_data:
             self.X_data_train_low_level  = self.join_objects(self.X_data_train_low_level)
             self.X_data_test_low_level   = self.join_objects(self.X_data_test_low_level)
+            self.X_data_tot_low_level    = self.join_objects(self.X_data_tot_low_level)
 
     def create_train_valid_set(self):
         """
@@ -698,7 +707,7 @@ class LSTM_DNN(object):
 
         return roc_test
 
-    def plot_roc(self, out_tag):
+    def plot_roc(self, out_tag, AUC):
         """
         Plot the roc curve for the classifier, using method from Plotter() class
         Arguments
@@ -707,7 +716,7 @@ class LSTM_DNN(object):
             output tag used as part of the image name, when saving
         """
         roc_fig = self.plotter.plot_roc(self.y_train, self.y_pred_train, self.train_weights, 
-                                        self.y_test, self.y_pred_test, self.test_weights, out_tag=out_tag
+                                        self.y_test, self.y_pred_test, self.test_weights, AUC=AUC, out_tag=out_tag
                                        )
 
         Utils.check_dir('{}/plotting/plots/{}'.format(os.getcwd(), out_tag))
@@ -718,7 +727,7 @@ class LSTM_DNN(object):
         #for MVA ROC comparisons later on
         np.savez("{}/models/{}_ROC_comp_arrays".format(os.getcwd(), out_tag),  self.y_pred_test, self.y_pred_test, self.test_weights)
 
-    def plot_output_score(self, out_tag, batch_size=64, ratio_plot=False, norm_to_data=False):
+    def plot_output_score(self, out_tag, batch_size=64, ratio_plot=False, norm_to_data=True, log=False, merge_bkg_procs={}):
         """
         Plot the output score for the classifier, for signal, background, and data
         Arguments
@@ -733,9 +742,14 @@ class LSTM_DNN(object):
             whether to normalise the integral of the simulated background, to the integral in data
         """
 
+        #output_score_fig = self.plotter.plot_output_score(self.y_test, self.y_pred_test, self.test_weights, self.proc_arr_test,
+        #                                                  self.model.predict([self.X_data_test_high_level, self.X_data_test_low_level], batch_size=batch_size).flatten(),
+        #                                                  MVA='DNN', ratio_plot=ratio_plot, norm_to_data=norm_to_data, log=log, merge_bkg_procs= merge_bkg_procs)
+
+
         output_score_fig = self.plotter.plot_output_score(self.y_test, self.y_pred_test, self.test_weights, self.proc_arr_test,
-                                                          self.model.predict([self.X_data_test_high_level, self.X_data_test_low_level], batch_size=batch_size).flatten(),
-                                                          MVA='DNN', ratio_plot=ratio_plot, norm_to_data=norm_to_data)
+                                                          self.model.predict([self.X_data_tot_high_level, self.X_data_tot_low_level], 
+                                                          batch_size=batch_size).flatten(), MVA='DNN', ratio_plot=ratio_plot, norm_to_data=norm_to_data, log=log, merge_bkg_procs= merge_bkg_procs)
 
         Utils.check_dir('{}/plotting/plots/{}'.format(os.getcwd(),out_tag))
         output_score_fig.savefig('{0}/plotting/plots/{1}/{1}_output_score.pdf'.format(os.getcwd(), out_tag))

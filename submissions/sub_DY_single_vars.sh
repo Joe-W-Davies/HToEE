@@ -12,11 +12,13 @@ cd $TMPDIR
 mkdir -p scratch_$RAND
 cd scratch_$RAND
 cp -r $MYDIR/python/ .
+cp -r $MYDIR/training/ .
 cp -r $MYDIR/configs/ .
 cp -r $MYDIR/plotting/ .
-cp -r $MYDIR/models/ .
 cp -r $MYDIR/MetaData/ .
+cp -r $MYDIR/models/ .
 cp $MYDIR/setup.sh .
+
 
 echo "DEBUG: dir is::"
 echo ${CWD}

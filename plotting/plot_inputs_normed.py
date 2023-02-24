@@ -65,7 +65,9 @@ def main(options):
 
         #set up X, w and y, train-test 
         plotter = Plotter(root_obj, train_vars, sig_col=sig_colour, norm_to_data=True)
-        for var in train_vars:
+        #for var in train_vars:
+        for var in ['dijetCentrality']:
+        #for var in ['dielectronPt']:
 
             fig  = plt.figure(1)
             axes = fig.gca()
@@ -86,12 +88,12 @@ def main(options):
             if not plotter.var_to_xrange[var][2]: axes.set_ylim(bottom=0, top=1.2*current_top)
             else:
                 axes.set_yscale('log', nonposy='clip')
-                axes.set_ylim(bottom=0.01, top=5*current_top)
+                axes.set_ylim(bottom=0.1, top=5*current_top)
 
             axes.set_xlim(left=plotter.var_to_xrange[var][0], right=plotter.var_to_xrange[var][1])
 
-            axes.legend(bbox_to_anchor=(0.97,0.97), ncol=1)
-            plotter.plot_cms_labels(axes, lumi='')
+            axes.legend(bbox_to_anchor=(0.97,0.97), ncol=1, prop={'size':10})
+            plotter.plot_cms_labels(axes, lumi='', label='Simulation Preliminary')
                
             axes.set_xlabel('{}'.format(plotter.var_to_xstring[var]), ha='right', x=1, size=13)
 
